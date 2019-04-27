@@ -6,12 +6,15 @@ Limnie is a local, highly configurable, flat virtual file system.
 Its main use is to act as a local object store subsystem.
 It relies on proven, robust SQLite technology and is heavily based on the pdstorage component of the -now defunct- postdoc project ( https://github.com/gregorplop/postdoc )
 		
-The main features of Limnie are briefly explained below:
-Local: 
+The main features of Limnie are briefly explained below:\
+
+**Local:**\
 A Limnie VFS should always be on the same machine as the applications mounting it.
-It SHOULD NOT be acessed over a network share or filesystem. Never, ever. It might appear to work at first, but YOU WILL LOSE YOUR DATA. PERIOD.
-Multiple applications running on the same machine, accessing a Limnie, is considered a safe practice.
-Highly configurable:
+It SHOULD NOT be acessed over a network share or filesystem. Never, ever. It might appear to work at first, but if used inappropriately, you **you will lose your data!**
+Multiple applications running on the same machine, accessing a Limnie, is a safe practice.
+
+
+**Highly configurable:**\
 A Limnie VFS consists of one or multiple storage pools that act as entirely seperate "buckets" you can assign data that belong to different domains, clients, or archival projects.
 Each pool consists of storage media. Media are the actual containers of the content you push into the VFS.
 Media are initialized to a specific (configurable) size and they grow gradually towards that limit but do not exceed it.
