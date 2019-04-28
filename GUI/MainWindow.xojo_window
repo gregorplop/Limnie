@@ -20,12 +20,12 @@ Begin Window MainWindow
    MenuBarVisible  =   True
    MinHeight       =   530
    MinimizeButton  =   True
-   MinWidth        =   800
+   MinWidth        =   888
    Placement       =   0
    Resizeable      =   True
    Title           =   "LimnieGUI"
    Visible         =   True
-   Width           =   800
+   Width           =   888
    Begin TabPanel MainPanel
       AutoDeactivate  =   True
       Bold            =   False
@@ -54,9 +54,9 @@ Begin Window MainWindow
       Top             =   20
       Transparent     =   False
       Underline       =   False
-      Value           =   0
+      Value           =   1
       Visible         =   True
-      Width           =   760
+      Width           =   848
       Begin PushButton CreateVFSbtn
          AutoDeactivate  =   True
          Bold            =   False
@@ -70,7 +70,7 @@ Begin Window MainWindow
          Index           =   -2147483648
          InitialParent   =   "MainPanel"
          Italic          =   False
-         Left            =   610
+         Left            =   698
          LockBottom      =   False
          LockedInPosition=   False
          LockLeft        =   False
@@ -166,7 +166,7 @@ Begin Window MainWindow
          Underline       =   False
          UseFocusRing    =   True
          Visible         =   True
-         Width           =   259
+         Width           =   347
       End
       Begin Label nameLabel
          AutoDeactivate  =   True
@@ -273,7 +273,7 @@ Begin Window MainWindow
          Visible         =   True
          Width           =   125
       End
-      Begin Label Label6
+      Begin Label PasswordLabel
          AutoDeactivate  =   True
          Bold            =   False
          DataField       =   ""
@@ -308,7 +308,7 @@ Begin Window MainWindow
          Visible         =   True
          Width           =   125
       End
-      Begin Label Label7
+      Begin Label timestampLabel
          AutoDeactivate  =   True
          Bold            =   False
          DataField       =   ""
@@ -343,7 +343,7 @@ Begin Window MainWindow
          Visible         =   True
          Width           =   125
       End
-      Begin Label Label8
+      Begin Label versionLabel
          AutoDeactivate  =   True
          Bold            =   False
          DataField       =   ""
@@ -455,7 +455,7 @@ Begin Window MainWindow
          Underline       =   False
          UseFocusRing    =   True
          Visible         =   True
-         Width           =   259
+         Width           =   347
       End
       Begin TextField nameField
          AcceptTabs      =   False
@@ -499,7 +499,7 @@ Begin Window MainWindow
          Underline       =   False
          UseFocusRing    =   True
          Visible         =   True
-         Width           =   259
+         Width           =   347
       End
       Begin TextField friendlynameField
          AcceptTabs      =   False
@@ -543,7 +543,7 @@ Begin Window MainWindow
          Underline       =   False
          UseFocusRing    =   True
          Visible         =   True
-         Width           =   259
+         Width           =   347
       End
       Begin TextField descriptionField
          AcceptTabs      =   False
@@ -587,7 +587,7 @@ Begin Window MainWindow
          Underline       =   False
          UseFocusRing    =   True
          Visible         =   True
-         Width           =   259
+         Width           =   347
       End
       Begin TextField passwordField
          AcceptTabs      =   False
@@ -631,7 +631,7 @@ Begin Window MainWindow
          Underline       =   False
          UseFocusRing    =   True
          Visible         =   True
-         Width           =   259
+         Width           =   347
       End
       Begin TextField initTimestampField
          AcceptTabs      =   False
@@ -675,7 +675,7 @@ Begin Window MainWindow
          Underline       =   False
          UseFocusRing    =   True
          Visible         =   True
-         Width           =   259
+         Width           =   347
       End
       Begin TextField versionField
          AcceptTabs      =   False
@@ -719,7 +719,7 @@ Begin Window MainWindow
          Underline       =   False
          UseFocusRing    =   True
          Visible         =   True
-         Width           =   259
+         Width           =   347
       End
       Begin PushButton openVFSbtn
          AutoDeactivate  =   True
@@ -734,7 +734,7 @@ Begin Window MainWindow
          Index           =   -2147483648
          InitialParent   =   "MainPanel"
          Italic          =   False
-         Left            =   448
+         Left            =   536
          LockBottom      =   False
          LockedInPosition=   False
          LockLeft        =   False
@@ -764,7 +764,7 @@ Begin Window MainWindow
          Index           =   -2147483648
          InitialParent   =   "MainPanel"
          Italic          =   False
-         Left            =   454
+         Left            =   518
          LockBottom      =   True
          LockedInPosition=   False
          LockLeft        =   False
@@ -777,7 +777,7 @@ Begin Window MainWindow
          TabPanelIndex   =   1
          TabStop         =   True
          Text            =   "Project Limnie by George Poulopoulos"
-         TextAlign       =   1
+         TextAlign       =   2
          TextColor       =   &c0000FF00
          TextFont        =   "System"
          TextSize        =   16.0
@@ -786,7 +786,7 @@ Begin Window MainWindow
          Transparent     =   False
          Underline       =   True
          Visible         =   True
-         Width           =   306
+         Width           =   330
       End
       Begin Oval SessionIndicator
          AutoDeactivate  =   True
@@ -798,7 +798,7 @@ Begin Window MainWindow
          HelpTag         =   "Active session indicator"
          Index           =   -2147483648
          InitialParent   =   "MainPanel"
-         Left            =   515
+         Left            =   603
          LockBottom      =   False
          LockedInPosition=   False
          LockLeft        =   False
@@ -819,13 +819,13 @@ Begin Window MainWindow
          Cancel          =   False
          Caption         =   "Close"
          Default         =   False
-         Enabled         =   True
+         Enabled         =   False
          Height          =   25
          HelpTag         =   ""
          Index           =   -2147483648
          InitialParent   =   "MainPanel"
          Italic          =   False
-         Left            =   610
+         Left            =   698
          LockBottom      =   False
          LockedInPosition=   False
          LockLeft        =   False
@@ -844,6 +844,169 @@ Begin Window MainWindow
          Visible         =   True
          Width           =   150
       End
+      Begin Label HostnameLabel
+         AutoDeactivate  =   True
+         Bold            =   False
+         DataField       =   ""
+         DataSource      =   ""
+         Enabled         =   True
+         Height          =   25
+         HelpTag         =   ""
+         Index           =   -2147483648
+         InitialParent   =   "MainPanel"
+         Italic          =   False
+         Left            =   40
+         LockBottom      =   False
+         LockedInPosition=   False
+         LockLeft        =   True
+         LockRight       =   False
+         LockTop         =   True
+         Multiline       =   False
+         Scope           =   0
+         Selectable      =   False
+         TabIndex        =   22
+         TabPanelIndex   =   1
+         TabStop         =   True
+         Text            =   "Hostname"
+         TextAlign       =   0
+         TextColor       =   &c00000000
+         TextFont        =   "System"
+         TextSize        =   16.0
+         TextUnit        =   0
+         Top             =   374
+         Transparent     =   True
+         Underline       =   False
+         Visible         =   True
+         Width           =   125
+      End
+      Begin TextField HostnameField
+         AcceptTabs      =   False
+         Alignment       =   2
+         AutoDeactivate  =   True
+         AutomaticallyCheckSpelling=   False
+         BackColor       =   &cFFFFFF00
+         Bold            =   False
+         Border          =   True
+         CueText         =   ""
+         DataField       =   ""
+         DataSource      =   ""
+         Enabled         =   False
+         Format          =   ""
+         Height          =   25
+         HelpTag         =   ""
+         Index           =   -2147483648
+         InitialParent   =   "MainPanel"
+         Italic          =   False
+         Left            =   177
+         LimitText       =   0
+         LockBottom      =   False
+         LockedInPosition=   False
+         LockLeft        =   True
+         LockRight       =   True
+         LockTop         =   True
+         Mask            =   ""
+         Password        =   False
+         ReadOnly        =   False
+         Scope           =   0
+         TabIndex        =   23
+         TabPanelIndex   =   1
+         TabStop         =   True
+         Text            =   ""
+         TextColor       =   &c00000000
+         TextFont        =   "System"
+         TextSize        =   16.0
+         TextUnit        =   0
+         Top             =   374
+         Transparent     =   False
+         Underline       =   False
+         UseFocusRing    =   True
+         Visible         =   True
+         Width           =   347
+      End
+      Begin Listbox PoolList
+         AutoDeactivate  =   True
+         AutoHideScrollbars=   True
+         Bold            =   False
+         Border          =   True
+         ColumnCount     =   1
+         ColumnsResizable=   False
+         ColumnWidths    =   ""
+         DataField       =   ""
+         DataSource      =   ""
+         DefaultRowHeight=   -1
+         Enabled         =   True
+         EnableDrag      =   False
+         EnableDragReorder=   False
+         GridLinesHorizontal=   0
+         GridLinesVertical=   0
+         HasHeading      =   False
+         HeadingIndex    =   -1
+         Height          =   364
+         HelpTag         =   ""
+         Hierarchical    =   False
+         Index           =   -2147483648
+         InitialParent   =   "MainPanel"
+         InitialValue    =   ""
+         Italic          =   False
+         Left            =   40
+         LockBottom      =   True
+         LockedInPosition=   False
+         LockLeft        =   True
+         LockRight       =   True
+         LockTop         =   True
+         RequiresSelection=   False
+         Scope           =   0
+         ScrollbarHorizontal=   False
+         ScrollBarVertical=   True
+         SelectionType   =   0
+         ShowDropIndicator=   False
+         TabIndex        =   0
+         TabPanelIndex   =   2
+         TabStop         =   True
+         TextFont        =   "System"
+         TextSize        =   16.0
+         TextUnit        =   0
+         Top             =   77
+         Transparent     =   False
+         Underline       =   False
+         UseFocusRing    =   True
+         Visible         =   True
+         Width           =   808
+         _ScrollOffset   =   0
+         _ScrollWidth    =   -1
+      End
+      Begin PushButton createPoolBtn
+         AutoDeactivate  =   True
+         Bold            =   False
+         ButtonStyle     =   "0"
+         Cancel          =   False
+         Caption         =   "Create Pool"
+         Default         =   False
+         Enabled         =   True
+         Height          =   25
+         HelpTag         =   ""
+         Index           =   -2147483648
+         InitialParent   =   "MainPanel"
+         Italic          =   False
+         Left            =   40
+         LockBottom      =   True
+         LockedInPosition=   False
+         LockLeft        =   True
+         LockRight       =   False
+         LockTop         =   False
+         Scope           =   0
+         TabIndex        =   1
+         TabPanelIndex   =   2
+         TabStop         =   True
+         TextFont        =   "System"
+         TextSize        =   14.0
+         TextUnit        =   0
+         Top             =   453
+         Transparent     =   False
+         Underline       =   False
+         Visible         =   True
+         Width           =   114
+      End
    End
 End
 #tag EndWindow
@@ -858,6 +1021,27 @@ End
 
 
 	#tag Method, Flags = &h0
+		Sub CloseLimnie()
+		  activeSession.Close
+		  
+		  descriptionField.Text = ""
+		  filenameField.Text = ""
+		  friendlynameField.Text = ""
+		  initTimestampField.Text = ""
+		  nameField.Text = ""
+		  passwordField.Text = ""
+		  uuidField.Text = ""
+		  versionField.Text = ""
+		  HostnameField.Text = ""
+		  
+		  SessionIndicator.FillColor = RGB(255,255,255)
+		  
+		  openVFSbtn.Enabled = true
+		  CreateVFSbtn.Enabled = true
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Function createLimnie() As Boolean
 		  dim newVFS as new Limnie.VFS
 		  
@@ -870,18 +1054,65 @@ End
 		  newVFS = Limnie.createLimnie(newVFS)
 		  
 		  if newVFS.error = true then 
+		    SessionIndicator.FillColor = RGB(255,0,0)
 		    MsgBox newVFS.errorMessage
 		    return False
 		  else
-		    
-		    initTimestampField.Text = newVFS.initStamp.SQLDateTime
-		    versionField.Text = newVFS.version
-		    uuidField.Text = newVFS.uuid
-		    
 		    Return true
 		  end if
 		End Function
 	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function openLimnie() As Boolean
+		  dim openVFS as new Limnie.VFS
+		  
+		  openVFS.file = GetFolderItem(filenameField.Text.Trim)
+		  openVFS.password = passwordField.Text.Trim
+		  
+		  activeSession = new Limnie.Session(openVFS)
+		  
+		  if activeSession.getLastError <> "" then
+		    closeBtn.Enabled = false 
+		    SessionIndicator.FillColor = RGB(255,0,0)
+		    msgbox activeSession.getLastError
+		    return False
+		  else
+		    
+		    openVFS = activeSession.getVFSdetails
+		    
+		    if openVFS.error = False then
+		      
+		      descriptionField.Text = openVFS.description
+		      friendlynameField.Text = openVFS.friendlyName
+		      nameField.Text = openVFS.name
+		      HostnameField.Text = openVFS.hostname
+		      initTimestampField.Text = openVFS.initStamp.SQLDateTime
+		      uuidField.Text = openVFS.uuid
+		      versionField.Text = openVFS.version
+		      
+		      SessionIndicator.FillColor = RGB(0,255,0)
+		      openVFSbtn.Enabled = False
+		      CreateVFSbtn.Enabled = false
+		      closeBtn.Enabled = true
+		      Return true
+		      
+		    else
+		      MsgBox openVFS.errorMessage
+		      SessionIndicator.FillColor = RGB(255,0,0)
+		      closeBtn.Enabled = false
+		      CloseLimnie
+		    end if
+		    
+		  end if
+		  
+		End Function
+	#tag EndMethod
+
+
+	#tag Property, Flags = &h0
+		activeSession As Limnie.Session
+	#tag EndProperty
 
 
 	#tag Constant, Name = defaultTitle, Type = String, Dynamic = False, Default = \"LimnieGUI", Scope = Private
@@ -894,6 +1125,10 @@ End
 	#tag Event
 		Sub Action()
 		  dim createOK as Boolean = createLimnie
+		  
+		  if createOK then 
+		    dim openOK as Boolean = openLimnie
+		  end if
 		  
 		End Sub
 	#tag EndEvent
@@ -912,6 +1147,7 @@ End
 #tag Events openVFSbtn
 	#tag Event
 		Sub Action()
+		  call openLimnie
 		  
 		End Sub
 	#tag EndEvent
@@ -927,7 +1163,7 @@ End
 #tag Events closeBtn
 	#tag Event
 		Sub Action()
-		  
+		  CloseLimnie
 		End Sub
 	#tag EndEvent
 #tag EndEvents

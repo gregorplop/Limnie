@@ -35,6 +35,10 @@ Protected Class VFS
 	#tag EndProperty
 
 	#tag Property, Flags = &h0
+		hostname As String
+	#tag EndProperty
+
+	#tag Property, Flags = &h0
 		initStamp As date
 	#tag EndProperty
 
@@ -117,6 +121,16 @@ Protected Class VFS
 			Group="Behavior"
 			Type="string"
 			EditorType="MultiLineEditor"
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="uuid"
+			Group="Behavior"
+			Type="String"
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="version"
+			Group="Behavior"
+			Type="string"
 		#tag EndViewProperty
 	#tag EndViewBehavior
 End Class

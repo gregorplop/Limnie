@@ -117,6 +117,11 @@ Protected Class stdOutcome
 			Type="String"
 			EditorType="MultiLineEditor"
 		#tag EndViewProperty
+		#tag ViewProperty
+			Name="MethodName"
+			Group="Behavior"
+			Type="String"
+		#tag EndViewProperty
 	#tag EndViewBehavior
 End Class
 #tag EndClass

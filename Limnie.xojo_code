@@ -98,6 +98,7 @@ Protected Module Limnie
 		  statements.Append "INSERT INTO vfs (key , value1) VALUES ('initstamp' , '" + initStamp.SQLDateTime + "')"
 		  statements.Append "INSERT INTO vfs (key , value1) VALUES ('description' , '" + newVFS.description + "')"
 		  statements.Append "INSERT INTO vfs (key , value1) VALUES ('version' , '" + str(LimnieVersion) + "')"
+		  statements.Append "INSERT INTO vfs (key , value1) VALUES ('hostname' , '" + hostname + "')"
 		  
 		  dim dbinitOutcome(-1) as string = bulkSQLexecute(newDBobject , statements , false)
 		  
@@ -186,6 +187,34 @@ Protected Module Limnie
 		End Function
 	#tag EndMethod
 
+	#tag Method, Flags = &h21
+		Private Function hostname() As String
+		  #If TargetWin32 then
+		    
+		    return System.environmentvariable("COMPUTERNAME").uppercase
+		    
+		  #elseif TargetLinux then
+		    
+		    dim hostname as new Shell
+		    hostname.Mode = 0
+		    hostname.Execute("hostname")
+		    return hostname.ReadAll.Uppercase
+		    
+		  #elseif TargetMacOS then
+		    
+		    dim hostname as new Shell
+		    hostname.Mode = 0
+		    hostname.Execute("hostname")
+		    return hostname.ReadAll.Uppercase
+		    
+		  #else
+		    
+		    Return empty
+		    
+		  #endif
+		End Function
+	#tag EndMethod
+
 	#tag Method, Flags = &h0
 		Function LimnieFileType() As FileType
 		  dim LimnieType as new FileType
@@ -271,7 +300,16 @@ Protected Module Limnie
 	#tag Constant, Name = empty, Type = String, Dynamic = False, Default = \"", Scope = Private
 	#tag EndConstant
 
+	#tag Constant, Name = fragmentSize, Type = Double, Dynamic = False, Default = \"8", Scope = Public
+	#tag EndConstant
+
 	#tag Constant, Name = LimnieVersion, Type = Double, Dynamic = False, Default = \"0.1", Scope = Public
+	#tag EndConstant
+
+	#tag Constant, Name = MByte, Type = Double, Dynamic = False, Default = \"1048576", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = ProjectURL, Type = Text, Dynamic = False, Default = \"https://github.com/gregorplop/Limnie", Scope = Public
 	#tag EndConstant
 
 
