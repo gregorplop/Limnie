@@ -246,6 +246,41 @@ Protected Module Limnie
 	#tag EndMethod
 
 	#tag Method, Flags = &h21
+		Private Function sqlQuote(extends input as Boolean) As string
+		  if input = true then
+		    return "'true'"
+		  else
+		    return "'false'"
+		  end if
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
+		Private Function sqlQuote(extends input() as String) As string()
+		  dim output(-1) as string
+		  
+		  for i as integer = 0 to input.Ubound
+		    output.Append input(i).sqlQuote
+		  next i
+		  
+		  return output
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
+		Private Function sqlQuote(extends input as string) As string
+		  if input = empty then 
+		    return " NULL "
+		  else
+		    return " '" + input + "' "
+		  end if
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
 		Private Function SuperTrim(extends inputString as String) As String
 		  dim output as String = inputString
 		  output = output.ReplaceAll(" " , empty)
@@ -307,6 +342,9 @@ Protected Module Limnie
 	#tag EndConstant
 
 	#tag Constant, Name = MByte, Type = Double, Dynamic = False, Default = \"1048576", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = mediumFilename, Type = String, Dynamic = False, Default = \"Limnie_medium", Scope = Private
 	#tag EndConstant
 
 	#tag Constant, Name = ProjectURL, Type = Text, Dynamic = False, Default = \"https://github.com/gregorplop/Limnie", Scope = Public

@@ -43,6 +43,10 @@ Protected Class Pool
 	#tag EndProperty
 
 	#tag Property, Flags = &h0
+		mediaCount As Integer
+	#tag EndProperty
+
+	#tag Property, Flags = &h0
 		mediumThreshold As Integer
 	#tag EndProperty
 
@@ -56,6 +60,10 @@ Protected Class Pool
 
 	#tag Property, Flags = &h0
 		rootFolder As FolderItem
+	#tag EndProperty
+
+	#tag Property, Flags = &h0
+		salt As string
 	#tag EndProperty
 
 	#tag Property, Flags = &h0
@@ -101,6 +109,7 @@ Protected Class Pool
 			Name="password"
 			Group="Behavior"
 			Type="String"
+			EditorType="MultiLineEditor"
 		#tag EndViewProperty
 		#tag ViewProperty
 			Name="mediumThreshold"
@@ -111,16 +120,19 @@ Protected Class Pool
 			Name="initStamp"
 			Group="Behavior"
 			Type="string"
+			EditorType="MultiLineEditor"
 		#tag EndViewProperty
 		#tag ViewProperty
 			Name="friendlyName"
 			Group="Behavior"
 			Type="string"
+			EditorType="MultiLineEditor"
 		#tag EndViewProperty
 		#tag ViewProperty
 			Name="errorMessage"
 			Group="Behavior"
 			Type="string"
+			EditorType="MultiLineEditor"
 		#tag EndViewProperty
 		#tag ViewProperty
 			Name="error"
@@ -136,6 +148,7 @@ Protected Class Pool
 			Name="comments"
 			Group="Behavior"
 			Type="string"
+			EditorType="MultiLineEditor"
 		#tag EndViewProperty
 		#tag ViewProperty
 			Name="autoExpand"
@@ -146,7 +159,8 @@ Protected Class Pool
 		#tag ViewProperty
 			Name="uuid"
 			Group="Behavior"
-			Type="Integer"
+			Type="String"
+			EditorType="MultiLineEditor"
 		#tag EndViewProperty
 	#tag EndViewBehavior
 End Class
