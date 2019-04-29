@@ -444,31 +444,27 @@ Protected Class Session
 		  end if
 		  
 		  // at this point the medium database file is ready
+		  mediumDB.close
 		  // all we have to do is declare it to the vfs database
 		  
-		  ReDim statements(-1)
-		  ReDim mediumInitOutcome(-1)
-		  
-		  statements.Append "INSERT INTO media (pool , idx , folder , threshold , initstamp , open) VALUES ('" + _
-		  poolname + "' , " + str(mediumID) + " , '" + mediumFolder.NativePath + "' , " + _ 
-		  str(threshold) + " , '" + mediumTimestamp.SQLDateTime + "' , 'true')"
-		  
-		  mediumInitOutcome = bulkSQLexecute(activeVFS , statements , false)
-		  if mediumInitOutcome.Ubound < 0 then // infrastructure error
-		    mediumDB.Close
+		  activeVFS.SQLExecute("INSERT INTO media (uuid , pool , idx , folder , threshold , initstamp , open) VALUES ('" + uuid + "' , '" + poolname + "' , " + str(mediumID) + " , '" + mediumFolder.NativePath + "' , " + str(threshold) + " , '" + mediumTimestamp.SQLDateTime + "' , 'true')")
+		  if activeVFS.Error then
 		    mediumDBfile.Delete
 		    mediumFolder.Delete
-		    return new pdOutcome(CurrentMethodName + ": Error registering medium datafile: " + pdLastError)
-		  ElseIf mediumInitOutcome(0) <> empty then  // sql statement execute error
-		    mediumDB.Close
-		    mediumDBfile.Delete
-		    mediumFolder.Delete
-		    return new pdOutcome(CurrentMethodName + ": Error registering medium datafile: " + mediumInitOutcome(0))
+		    return new Limnie.Medium("Error registering new medium: " + activeVFS.ErrorMessage)
 		  end if
 		  
-		  // at this point everything went well
-		  mediumDB.close
-		  return new pdOutcome(true)
+		  // at this point everything supposedly went well, let's test it
+		  dim newlyCreatedMedium as Limnie.Medium = getMediumDetails(poolname , mediumID)
+		  if newlyCreatedMedium.error  then  // hm.. not really, rollback what we did
+		    activeVFS.SQLExecute("DELETE FROM media WHERE uuid = '" + uuid + "'")
+		    if activeVFS.Error = False then
+		      mediumDBfile.Delete
+		      mediumFolder.Delete
+		    end if
+		  end if
+		  
+		  Return newlyCreatedMedium
 		  
 		  
 		End Function
@@ -495,7 +491,7 @@ Protected Class Session
 		  dim uuid as String = generateUUID
 		  if uuid = empty then return new Limnie.Pool("Error creating pool: Could not generate pool UUID")
 		  
-		  insert = "INSERT INTO pools (uuid , name , friendlyname , comments , rootfolder , sizelimit , initstamp , autoexpand , autoclose , salt) VALUES ("
+		  insert = "INSERT INTO pools (uuid , name , friendlyname , comments , rootfolder , sizelimit , initstamp , autoexpand , salt) VALUES ("
 		  insert = insert + uuid.sqlQuote + ","
 		  insert = insert + newPool.Name.sqlQuote + ","
 		  insert = insert + newPool.friendlyName.sqlQuote + ","
@@ -534,7 +530,7 @@ Protected Class Session
 		  // store the password in the cache
 		  if newPool.password.Trim <> empty then 
 		    poolPasswords.Value(newPool.name) = preparePassword(newPool.password.Trim , salt)
-		      // store the password for the duration of the current session
+		    // store the password for the duration of the current session
 		  end if
 		  
 		  newPool.error = false
@@ -550,13 +546,13 @@ Protected Class Session
 		  // returns either error message or empty for success
 		  dim ErrorPrefix as string = "Error rolling back new pool creation: " 
 		  
-		  if IsNull(activeVFS) = true then return ErrorPrefix + "VFS session is no longer active")
+		  if IsNull(activeVFS) = true then return ErrorPrefix + "VFS session is no longer active"
 		  
 		  activeVFS.SQLExecute("DROP TABLE " + poolname)
-		  if activeVFS.Error = true then return ErrorPrefix + "Rollback pool init fail: "+ activeVFS.ErrorMessage)
+		  if activeVFS.Error = true then return ErrorPrefix + "Rollback pool init fail: "+ activeVFS.ErrorMessage
 		  
 		  activeVFS.SQLExecute("DELETE FROM pools WHERE name = '" + poolname + "'")
-		  if activeVFS.Error = true then return ErrorPrefix + "Rollback pool init fail: "+ activeVFS.ErrorMessage)
+		  if activeVFS.Error = true then return ErrorPrefix + "Rollback pool init fail: "+ activeVFS.ErrorMessage
 		  
 		  if IsNull(poolPasswords) = false then
 		    if poolPasswords.HasKey(poolname) = true then poolPasswords.Remove(poolname)

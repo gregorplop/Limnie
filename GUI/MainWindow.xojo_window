@@ -16,7 +16,7 @@ Begin Window MainWindow
    MaxHeight       =   32000
    MaximizeButton  =   False
    MaxWidth        =   32000
-   MenuBar         =   1288990719
+   MenuBar         =   0
    MenuBarVisible  =   True
    MinHeight       =   530
    MinimizeButton  =   True
@@ -25,12 +25,12 @@ Begin Window MainWindow
    Resizeable      =   True
    Title           =   "LimnieGUI"
    Visible         =   True
-   Width           =   888
+   Width           =   980
    Begin TabPanel MainPanel
       AutoDeactivate  =   True
       Bold            =   False
       Enabled         =   True
-      Height          =   490
+      Height          =   473
       HelpTag         =   ""
       Index           =   -2147483648
       InitialParent   =   ""
@@ -56,7 +56,7 @@ Begin Window MainWindow
       Underline       =   False
       Value           =   1
       Visible         =   True
-      Width           =   848
+      Width           =   940
       Begin PushButton CreateVFSbtn
          AutoDeactivate  =   True
          Bold            =   False
@@ -70,7 +70,7 @@ Begin Window MainWindow
          Index           =   -2147483648
          InitialParent   =   "MainPanel"
          Italic          =   False
-         Left            =   698
+         Left            =   790
          LockBottom      =   False
          LockedInPosition=   False
          LockLeft        =   False
@@ -166,7 +166,7 @@ Begin Window MainWindow
          Underline       =   False
          UseFocusRing    =   True
          Visible         =   True
-         Width           =   347
+         Width           =   439
       End
       Begin Label nameLabel
          AutoDeactivate  =   True
@@ -455,7 +455,7 @@ Begin Window MainWindow
          Underline       =   False
          UseFocusRing    =   True
          Visible         =   True
-         Width           =   347
+         Width           =   439
       End
       Begin TextField nameField
          AcceptTabs      =   False
@@ -499,7 +499,7 @@ Begin Window MainWindow
          Underline       =   False
          UseFocusRing    =   True
          Visible         =   True
-         Width           =   347
+         Width           =   439
       End
       Begin TextField friendlynameField
          AcceptTabs      =   False
@@ -543,7 +543,7 @@ Begin Window MainWindow
          Underline       =   False
          UseFocusRing    =   True
          Visible         =   True
-         Width           =   347
+         Width           =   439
       End
       Begin TextField descriptionField
          AcceptTabs      =   False
@@ -587,7 +587,7 @@ Begin Window MainWindow
          Underline       =   False
          UseFocusRing    =   True
          Visible         =   True
-         Width           =   347
+         Width           =   439
       End
       Begin TextField passwordField
          AcceptTabs      =   False
@@ -631,7 +631,7 @@ Begin Window MainWindow
          Underline       =   False
          UseFocusRing    =   True
          Visible         =   True
-         Width           =   347
+         Width           =   439
       End
       Begin TextField initTimestampField
          AcceptTabs      =   False
@@ -675,7 +675,7 @@ Begin Window MainWindow
          Underline       =   False
          UseFocusRing    =   True
          Visible         =   True
-         Width           =   347
+         Width           =   439
       End
       Begin TextField versionField
          AcceptTabs      =   False
@@ -719,7 +719,7 @@ Begin Window MainWindow
          Underline       =   False
          UseFocusRing    =   True
          Visible         =   True
-         Width           =   347
+         Width           =   439
       End
       Begin PushButton openVFSbtn
          AutoDeactivate  =   True
@@ -734,7 +734,7 @@ Begin Window MainWindow
          Index           =   -2147483648
          InitialParent   =   "MainPanel"
          Italic          =   False
-         Left            =   536
+         Left            =   628
          LockBottom      =   False
          LockedInPosition=   False
          LockLeft        =   False
@@ -753,65 +753,6 @@ Begin Window MainWindow
          Visible         =   True
          Width           =   150
       End
-      Begin Label projectLink
-         AutoDeactivate  =   True
-         Bold            =   False
-         DataField       =   ""
-         DataSource      =   ""
-         Enabled         =   True
-         Height          =   25
-         HelpTag         =   ""
-         Index           =   -2147483648
-         InitialParent   =   "MainPanel"
-         Italic          =   False
-         Left            =   518
-         LockBottom      =   True
-         LockedInPosition=   False
-         LockLeft        =   False
-         LockRight       =   True
-         LockTop         =   False
-         Multiline       =   False
-         Scope           =   0
-         Selectable      =   False
-         TabIndex        =   19
-         TabPanelIndex   =   1
-         TabStop         =   True
-         Text            =   "Project Limnie by George Poulopoulos"
-         TextAlign       =   2
-         TextColor       =   &c0000FF00
-         TextFont        =   "System"
-         TextSize        =   16.0
-         TextUnit        =   0
-         Top             =   465
-         Transparent     =   False
-         Underline       =   True
-         Visible         =   True
-         Width           =   330
-      End
-      Begin Oval SessionIndicator
-         AutoDeactivate  =   True
-         BorderColor     =   &c00000000
-         BorderWidth     =   1
-         Enabled         =   True
-         FillColor       =   &cFFFFFF00
-         Height          =   25
-         HelpTag         =   "Active session indicator"
-         Index           =   -2147483648
-         InitialParent   =   "MainPanel"
-         Left            =   603
-         LockBottom      =   False
-         LockedInPosition=   False
-         LockLeft        =   False
-         LockRight       =   True
-         LockTop         =   True
-         Scope           =   0
-         TabIndex        =   20
-         TabPanelIndex   =   1
-         Top             =   115
-         Transparent     =   True
-         Visible         =   True
-         Width           =   25
-      End
       Begin PushButton closeBtn
          AutoDeactivate  =   True
          Bold            =   False
@@ -825,7 +766,7 @@ Begin Window MainWindow
          Index           =   -2147483648
          InitialParent   =   "MainPanel"
          Italic          =   False
-         Left            =   698
+         Left            =   790
          LockBottom      =   False
          LockedInPosition=   False
          LockLeft        =   False
@@ -921,7 +862,7 @@ Begin Window MainWindow
          Underline       =   False
          UseFocusRing    =   True
          Visible         =   True
-         Width           =   347
+         Width           =   439
       End
       Begin Listbox PoolList
          AutoDeactivate  =   True
@@ -941,7 +882,7 @@ Begin Window MainWindow
          GridLinesVertical=   0
          HasHeading      =   False
          HeadingIndex    =   -1
-         Height          =   364
+         Height          =   347
          HelpTag         =   ""
          Hierarchical    =   False
          Index           =   -2147483648
@@ -980,7 +921,7 @@ Begin Window MainWindow
          Bold            =   False
          ButtonStyle     =   "0"
          Cancel          =   False
-         Caption         =   "Create Pool"
+         Caption         =   "New Pool"
          Default         =   False
          Enabled         =   True
          Height          =   25
@@ -988,7 +929,7 @@ Begin Window MainWindow
          Index           =   -2147483648
          InitialParent   =   "MainPanel"
          Italic          =   False
-         Left            =   40
+         Left            =   411
          LockBottom      =   True
          LockedInPosition=   False
          LockLeft        =   True
@@ -1001,7 +942,7 @@ Begin Window MainWindow
          TextFont        =   "System"
          TextSize        =   14.0
          TextUnit        =   0
-         Top             =   459
+         Top             =   436
          Transparent     =   False
          Underline       =   False
          Visible         =   True
@@ -1112,7 +1053,7 @@ Begin Window MainWindow
          Visible         =   True
          Width           =   125
       End
-      Begin Label PasswordLabel1
+      Begin Label PasswordLabel_pool
          AutoDeactivate  =   True
          Bold            =   False
          DataField       =   ""
@@ -1224,7 +1165,7 @@ Begin Window MainWindow
          Underline       =   False
          UseFocusRing    =   True
          Visible         =   True
-         Width           =   300
+         Width           =   392
       End
       Begin TextField friendlyNameField_pool
          AcceptTabs      =   False
@@ -1268,7 +1209,7 @@ Begin Window MainWindow
          Underline       =   False
          UseFocusRing    =   True
          Visible         =   True
-         Width           =   300
+         Width           =   392
       End
       Begin TextField commentsField_pool
          AcceptTabs      =   False
@@ -1312,7 +1253,7 @@ Begin Window MainWindow
          Underline       =   False
          UseFocusRing    =   True
          Visible         =   True
-         Width           =   300
+         Width           =   392
       End
       Begin TextField passwordField_pool
          AcceptTabs      =   False
@@ -1356,7 +1297,7 @@ Begin Window MainWindow
          Underline       =   False
          UseFocusRing    =   True
          Visible         =   True
-         Width           =   300
+         Width           =   392
       End
       Begin TextField initTimestampField_pool
          AcceptTabs      =   False
@@ -1400,7 +1341,7 @@ Begin Window MainWindow
          Underline       =   False
          UseFocusRing    =   True
          Visible         =   True
-         Width           =   300
+         Width           =   392
       End
       Begin Label uuidLabel_pool
          AutoDeactivate  =   True
@@ -1479,7 +1420,7 @@ Begin Window MainWindow
          Underline       =   False
          UseFocusRing    =   True
          Visible         =   True
-         Width           =   300
+         Width           =   392
       End
       Begin Label rootFolderLabel_pool
          AutoDeactivate  =   True
@@ -1558,7 +1499,7 @@ Begin Window MainWindow
          Underline       =   False
          UseFocusRing    =   True
          Visible         =   True
-         Width           =   300
+         Width           =   392
       End
       Begin Label thresholdLabel_pool
          AutoDeactivate  =   True
@@ -1637,7 +1578,7 @@ Begin Window MainWindow
          Underline       =   False
          UseFocusRing    =   True
          Visible         =   True
-         Width           =   300
+         Width           =   392
       End
       Begin Label AutoExpandLabel_pool
          AutoDeactivate  =   True
@@ -1705,8 +1646,171 @@ Begin Window MainWindow
          Underline       =   False
          Value           =   True
          Visible         =   True
-         Width           =   300
+         Width           =   392
       End
+      Begin PushButton updatePoolBtn
+         AutoDeactivate  =   True
+         Bold            =   False
+         ButtonStyle     =   "0"
+         Cancel          =   False
+         Caption         =   "Update Pool"
+         Default         =   False
+         Enabled         =   True
+         Height          =   25
+         HelpTag         =   ""
+         Index           =   -2147483648
+         InitialParent   =   "MainPanel"
+         Italic          =   False
+         Left            =   537
+         LockBottom      =   True
+         LockedInPosition=   False
+         LockLeft        =   True
+         LockRight       =   False
+         LockTop         =   False
+         Scope           =   0
+         TabIndex        =   22
+         TabPanelIndex   =   2
+         TabStop         =   True
+         TextFont        =   "System"
+         TextSize        =   14.0
+         TextUnit        =   0
+         Top             =   436
+         Transparent     =   False
+         Underline       =   False
+         Visible         =   True
+         Width           =   114
+      End
+      Begin PushButton showMediaBtn
+         AutoDeactivate  =   True
+         Bold            =   False
+         ButtonStyle     =   "0"
+         Cancel          =   False
+         Caption         =   "Show Media"
+         Default         =   False
+         Enabled         =   True
+         Height          =   25
+         HelpTag         =   ""
+         Index           =   -2147483648
+         InitialParent   =   "MainPanel"
+         Italic          =   False
+         Left            =   40
+         LockBottom      =   True
+         LockedInPosition=   False
+         LockLeft        =   True
+         LockRight       =   False
+         LockTop         =   False
+         Scope           =   0
+         TabIndex        =   23
+         TabPanelIndex   =   2
+         TabStop         =   True
+         TextFont        =   "System"
+         TextSize        =   14.0
+         TextUnit        =   0
+         Top             =   436
+         Transparent     =   False
+         Underline       =   False
+         Visible         =   True
+         Width           =   114
+      End
+      Begin PushButton newMediumBtn
+         AutoDeactivate  =   True
+         Bold            =   False
+         ButtonStyle     =   "0"
+         Cancel          =   False
+         Caption         =   "New Medium"
+         Default         =   False
+         Enabled         =   True
+         Height          =   25
+         HelpTag         =   ""
+         Index           =   -2147483648
+         InitialParent   =   "MainPanel"
+         Italic          =   False
+         Left            =   166
+         LockBottom      =   True
+         LockedInPosition=   False
+         LockLeft        =   True
+         LockRight       =   False
+         LockTop         =   False
+         Scope           =   0
+         TabIndex        =   24
+         TabPanelIndex   =   2
+         TabStop         =   True
+         TextFont        =   "System"
+         TextSize        =   14.0
+         TextUnit        =   0
+         Top             =   436
+         Transparent     =   False
+         Underline       =   False
+         Visible         =   True
+         Width           =   114
+      End
+   End
+   Begin Timer RefreshTimer
+      Index           =   -2147483648
+      LockedInPosition=   False
+      Mode            =   0
+      Period          =   1000
+      Scope           =   0
+      TabPanelIndex   =   0
+   End
+   Begin Oval SessionIndicator
+      AutoDeactivate  =   True
+      BorderColor     =   &c00000000
+      BorderWidth     =   1
+      Enabled         =   True
+      FillColor       =   &cFFFFFF00
+      Height          =   20
+      HelpTag         =   "Active session indicator"
+      Index           =   -2147483648
+      InitialParent   =   ""
+      Left            =   20
+      LockBottom      =   True
+      LockedInPosition=   False
+      LockLeft        =   True
+      LockRight       =   False
+      LockTop         =   False
+      Scope           =   0
+      TabIndex        =   1
+      TabPanelIndex   =   0
+      Top             =   501
+      Transparent     =   True
+      Visible         =   True
+      Width           =   20
+   End
+   Begin Label projectLink
+      AutoDeactivate  =   True
+      Bold            =   False
+      DataField       =   ""
+      DataSource      =   ""
+      Enabled         =   True
+      Height          =   25
+      HelpTag         =   ""
+      Index           =   -2147483648
+      InitialParent   =   ""
+      Italic          =   False
+      Left            =   630
+      LockBottom      =   True
+      LockedInPosition=   False
+      LockLeft        =   False
+      LockRight       =   True
+      LockTop         =   False
+      Multiline       =   False
+      Scope           =   0
+      Selectable      =   False
+      TabIndex        =   2
+      TabPanelIndex   =   0
+      TabStop         =   True
+      Text            =   "Project Limnie by George Poulopoulos"
+      TextAlign       =   2
+      TextColor       =   &c0000FF00
+      TextFont        =   "System"
+      TextSize        =   16.0
+      TextUnit        =   0
+      Top             =   496
+      Transparent     =   False
+      Underline       =   True
+      Visible         =   True
+      Width           =   330
    End
 End
 #tag EndWindow
@@ -1716,14 +1820,14 @@ End
 		Sub Open()
 		  me.Title = defaultTitle + " version " + str(LimnieVersion)
 		  
+		  setState(UIstates.noVFSopen)
+		  
 		End Sub
 	#tag EndEvent
 
 
 	#tag Method, Flags = &h0
-		Sub CloseLimnie()
-		  activeSession.Close
-		  
+		Sub clearPanels()
 		  descriptionField.Text = ""
 		  filenameField.Text = ""
 		  friendlynameField.Text = ""
@@ -1734,10 +1838,35 @@ End
 		  versionField.Text = ""
 		  HostnameField.Text = ""
 		  
-		  SessionIndicator.FillColor = RGB(255,255,255)
+		  PoolList.DeleteAllRows
+		  PoolList.AddRow "<NEW>"
 		  
-		  openVFSbtn.Enabled = true
-		  CreateVFSbtn.Enabled = true
+		  ClearPoolFields
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub ClearPoolFields()
+		  AutoExpandCheck_pool.Value = true
+		  commentsField_pool.Text = ""
+		  friendlyNameField_pool.Text = ""
+		  initTimestampField_pool.Text = ""
+		  passwordField_pool.Text = ""
+		  rootFolderField_pool.Text = ""
+		  thresholdField_pool.Text = ""
+		  initTimestampField_pool.Text = ""
+		  uuidField_pool.Text = ""
+		  
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub CloseLimnie()
+		  activeSession.Close
+		  
+		  setState(UIstates.noVFSopen)
+		  
+		  
 		End Sub
 	#tag EndMethod
 
@@ -1764,7 +1893,50 @@ End
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
+		Function createPool() As Boolean
+		  dim newPool as new Limnie.Pool
+		  
+		  newPool.name = nameField_pool.Text.Trim
+		  newPool.friendlyName = friendlyNameField_pool.Text.Trim
+		  newPool.comments = commentsField_pool.Text.Trim
+		  newPool.rootFolder = GetFolderItem(rootFolderField_pool.Text.Trim)
+		  newPool.password = passwordField_pool.Text.Trim
+		  newPool.mediumThreshold = thresholdField_pool.Text.Trim.Val
+		  newPool.autoExpand = AutoExpandCheck_pool.Value
+		  
+		  newPool = activeSession.createNewPool(newPool)
+		  
+		  if newPool.error then
+		    MsgBox "Error creating pool: " + newPool.errorMessage
+		    return false
+		    
+		  else
+		    uuidField_pool.Text = newPool.uuid
+		    initTimestampField_pool.Text = newPool.initStamp
+		    
+		    return true
+		    
+		  end if
+		  
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function isPoolListed(poolname as string) As integer
+		  for i as Integer = 1 to PoolList.ListCount - 1
+		    if PoolList.cell(i,0) = poolname then return i
+		  next i
+		  
+		  return -1
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Function openLimnie() As Boolean
+		  if filenameField.Text.Trim = "" then return false
+		  
 		  dim openVFS as new Limnie.VFS
 		  
 		  openVFS.file = GetFolderItem(filenameField.Text.Trim)
@@ -1773,7 +1945,7 @@ End
 		  activeSession = new Limnie.Session(openVFS)
 		  
 		  if activeSession.getLastError <> "" then
-		    closeBtn.Enabled = false 
+		    setState(UIstates.noVFSopen)
 		    SessionIndicator.FillColor = RGB(255,0,0)
 		    msgbox activeSession.getLastError
 		    return False
@@ -1783,6 +1955,9 @@ End
 		    
 		    if openVFS.error = False then
 		      
+		      setState(UIstates.VFSopenIdle)
+		      SessionIndicator.FillColor = RGB(0,255,0)
+		      
 		      descriptionField.Text = openVFS.description
 		      friendlynameField.Text = openVFS.friendlyName
 		      nameField.Text = openVFS.name
@@ -1791,22 +1966,90 @@ End
 		      uuidField.Text = openVFS.uuid
 		      versionField.Text = openVFS.version
 		      
-		      SessionIndicator.FillColor = RGB(0,255,0)
-		      openVFSbtn.Enabled = False
-		      CreateVFSbtn.Enabled = false
-		      closeBtn.Enabled = true
 		      Return true
 		      
 		    else
-		      MsgBox openVFS.errorMessage
 		      SessionIndicator.FillColor = RGB(255,0,0)
-		      closeBtn.Enabled = false
+		      MsgBox openVFS.errorMessage
 		      CloseLimnie
 		    end if
 		    
 		  end if
 		  
 		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function refreshPoolList() As string
+		  dim pools(-1) as String = activeSession.getPoolNames
+		  dim pooldetails as  Limnie.Pool
+		  dim rowFound as Integer
+		  
+		  if activeSession.getLastError <> "" then Return "Error updating pool info data: " + activeSession.getLastError
+		  
+		  
+		  for i as Integer = 0 to pools.Ubound
+		    pooldetails = activeSession.getPoolDetails(pools(i) , true)
+		    if pooldetails.error then return "Error getting details for pool " + pools(i)
+		    
+		    rowFound = isPoolListed(pooldetails.name)
+		    
+		    if rowFound < 0 then // new pool, not in list
+		      PoolList.AddRow pooldetails.name , str(pooldetails.encrypted) , str(pooldetails.mediaCount)
+		      PoolList.RowTag(PoolList.LastIndex) = pooldetails
+		    else  // pool already in list
+		      PoolList.cell(rowFound , 2) = str(pooldetails.mediaCount)
+		      PoolList.RowTag(rowFound) = pooldetails
+		    end if
+		    
+		  next i
+		  
+		  Return ""
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub setState(state as UIstates)
+		  select case state
+		    
+		  case UIstates.noVFSopen
+		    
+		    RefreshTimer.Mode = timer.ModeOff
+		    
+		    clearPanels
+		    
+		    SessionIndicator.FillColor = RGB(255,255,255)
+		    
+		    openVFSbtn.Enabled = true
+		    CreateVFSbtn.Enabled = true
+		    closeBtn.Enabled = false
+		    
+		    PoolList.Enabled = false
+		    createPoolBtn.Enabled = false
+		    newMediumBtn.Enabled = false
+		    showMediaBtn.Enabled = false
+		    updatePoolBtn.Enabled = false
+		    
+		  case UIstates.VFSopenIdle
+		    
+		    openVFSbtn.Enabled = False
+		    CreateVFSbtn.Enabled = false
+		    closeBtn.Enabled = true
+		    
+		    PoolList.Enabled = true
+		    createPoolBtn.Enabled = true
+		    newMediumBtn.Enabled = true
+		    showMediaBtn.Enabled = true
+		    updatePoolBtn.Enabled = false
+		    
+		    PoolList.ListIndex = 0
+		    
+		    RefreshTimer.Mode = timer.ModeMultiple
+		    
+		  end select
+		  
+		  
+		End Sub
 	#tag EndMethod
 
 
@@ -1817,6 +2060,12 @@ End
 
 	#tag Constant, Name = defaultTitle, Type = String, Dynamic = False, Default = \"LimnieGUI", Scope = Private
 	#tag EndConstant
+
+
+	#tag Enum, Name = UIstates, Type = Integer, Flags = &h0
+		noVFSopen
+		VFSopenIdle
+	#tag EndEnum
 
 
 #tag EndWindowCode
@@ -1843,6 +2092,19 @@ End
 		  
 		End Function
 	#tag EndEvent
+	#tag Event
+		Function KeyDown(Key As String) As Boolean
+		  select case asc(key)
+		    
+		  case 3,13
+		    call openLimnie
+		    return true
+		  else
+		    return false
+		  end select
+		  
+		End Function
+	#tag EndEvent
 #tag EndEvents
 #tag Events openVFSbtn
 	#tag Event
@@ -1850,14 +2112,6 @@ End
 		  call openLimnie
 		  
 		End Sub
-	#tag EndEvent
-#tag EndEvents
-#tag Events projectLink
-	#tag Event
-		Function MouseDown(X As Integer, Y As Integer) As Boolean
-		  ShowURL("https://github.com/gregorplop/Limnie")
-		  
-		End Function
 	#tag EndEvent
 #tag EndEvents
 #tag Events closeBtn
@@ -1878,16 +2132,80 @@ End
 		  me.HasHeading = true
 		  me.ColumnsResizable = false
 		  me.HeaderType(-1) = Listbox.HeaderTypes.NotSortable
+		  me.RequiresSelection = true
 		  
-		  me.AddRow "<NEW>" 
 		  
 		  
+		  
+		End Sub
+	#tag EndEvent
+	#tag Event
+		Function CellBackgroundPaint(g As Graphics, row As Integer, column As Integer) As Boolean
+		  If row Mod 2 = 0 Then
+		    g.ForeColor= &cf7faff
+		  Else
+		    g.ForeColor= &cffffff
+		  End If
+		  g.FillRect(0, 0, g.Width, g.Height)
+		End Function
+	#tag EndEvent
+	#tag Event
+		Sub Change()
+		  dim row as Integer = me.ListIndex
+		  
+		  if row < 0 then return
+		  
+		  if me.cell(row,0) = "<NEW>" then
+		    ClearPoolFields
+		    
+		    showMediaBtn.Enabled = false
+		    newMediumBtn.Enabled = false
+		    createPoolBtn.Enabled = true
+		    
+		    passwordField_pool.Enabled = true
+		    passwordField_pool.Text = ""
+		    nameField_pool.Enabled = true
+		    updatePoolBtn.Enabled = False
+		    
+		    nameField_pool.Text = ""
+		    nameField_pool.SetFocus
+		    
+		  else
+		    if me.RowTag(row) isa Limnie.Pool then
+		      
+		      showMediaBtn.Enabled = true
+		      newMediumBtn.Enabled = true
+		      updatePoolBtn.Enabled = true
+		      createPoolBtn.Enabled = False
+		      
+		      dim pooldetails as Limnie.Pool = me.RowTag(row)
+		      
+		      passwordField_pool.Enabled = false
+		      
+		      nameField_pool.Text = pooldetails.name
+		      nameField_pool.Enabled = False
+		      
+		      friendlyNameField_pool.Text = pooldetails.friendlyName
+		      commentsField_pool.Text = pooldetails.comments
+		      rootFolderField_pool.Text = pooldetails.rootFolder.NativePath
+		      thresholdField_pool.Text = str(pooldetails.mediumThreshold)
+		      initTimestampField_pool.Text = pooldetails.initStamp
+		      uuidField_pool.Text = pooldetails.uuid
+		      AutoExpandCheck_pool.Value = pooldetails.autoExpand
+		      
+		      passwordField_pool.Text = if(pooldetails.encrypted = true , "XXXXXX" , "")  // if encrypted, just show something to indicate that
+		      
+		      
+		    end if
+		  end if
 		End Sub
 	#tag EndEvent
 #tag EndEvents
 #tag Events createPoolBtn
 	#tag Event
 		Sub Action()
+		  
+		  call createPool
 		  
 		End Sub
 	#tag EndEvent
@@ -1914,6 +2232,49 @@ End
 		  end if
 		  
 		End Sub
+	#tag EndEvent
+#tag EndEvents
+#tag Events updatePoolBtn
+	#tag Event
+		Sub Action()
+		  
+		End Sub
+	#tag EndEvent
+#tag EndEvents
+#tag Events showMediaBtn
+	#tag Event
+		Sub Action()
+		  
+		End Sub
+	#tag EndEvent
+#tag EndEvents
+#tag Events newMediumBtn
+	#tag Event
+		Sub Action()
+		  
+		End Sub
+	#tag EndEvent
+#tag EndEvents
+#tag Events RefreshTimer
+	#tag Event
+		Sub Action()
+		  
+		  dim refreshPoolsOK as String = refreshPoolList
+		  
+		  if refreshPoolsOK <> "" then
+		    me.Mode = timer.ModeOff
+		    MsgBox "Error returned by auto-refreshing mechanism: " + EndOfLine + refreshPoolsOK + EndOfLine + EndOfLine + "Automatic refreshing has been suspended"
+		  end if
+		  
+		End Sub
+	#tag EndEvent
+#tag EndEvents
+#tag Events projectLink
+	#tag Event
+		Function MouseDown(X As Integer, Y As Integer) As Boolean
+		  ShowURL("https://github.com/gregorplop/Limnie")
+		  
+		End Function
 	#tag EndEvent
 #tag EndEvents
 #tag ViewBehavior

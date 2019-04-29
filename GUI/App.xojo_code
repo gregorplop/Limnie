@@ -3,8 +3,6 @@ Protected Class App
 Inherits Application
 	#tag Event
 		Sub Open()
-		  
-		  
 		  MainWindow.Show
 		  
 		End Sub
