@@ -144,7 +144,6 @@ Protected Class Session
 
 	#tag Method, Flags = &h0
 		Function createNewPool(newPool as Limnie.Pool) As Limnie.Pool
-		  
 		  newPool = initPool(newPool)
 		  if newPool.error then Return newPool  // something went wrong creating the pool in the VFS: fail
 		  
@@ -181,11 +180,80 @@ Protected Class Session
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
+		Function createNextMedium(poolname as string, autoExpansion as Boolean) As Limnie.Medium
+		  dim pooldetails as Limnie.Pool = getPoolDetails(poolname)
+		  if pooldetails.error then return new Limnie.Medium("Error verifying pool: " + pooldetails.errorMessage)
+		  
+		  if pooldetails.autoExpand = False and autoExpansion = true then return new Limnie.Medium("This pool is not set to auto-expand!")
+		  
+		  dim poolLock as new Mutex(pooldetails.uuid)
+		  if poolLock.TryEnter = false then Return new Limnie.Medium("Pool " + poolname + " locked for maintenance" , 2)  // error code 2 is to differentiate this failure from an infrastructure failure: it means TRY LATER, rather than IT BLEW UP, FORGET IT
+		  
+		  // at this point we have successfully locked the pool for maintenance
+		  
+		  dim nextFreeID as integer = getFreeMediumID(poolname)
+		  if nextFreeID < 0 then 
+		    poolLock.Leave
+		    return new Limnie.Medium("Error getting free medium ID: " + ErrorMsg)
+		  end if
+		  
+		  // we have a free id and we know nobody else is going to reserve it
+		  
+		  if pooldetails.encrypted = true then  // we need to find the password
+		    dim verifyOK as pair
+		    if poolPasswords.HasKey("poolname") then // there's a password in the pool password cache, let's verify it
+		      verifyOK = testPoolPassword(poolname , poolPasswords.Value("poolname"))
+		      
+		      
+		    end if
+		    
+		    
+		  end if
+		  
+		  
+		  
+		  dim createMediumOutcome as pdOutcome = initMedium(poolname , nextFreeID , poolInfo.rootFolder , poolInfo.mediumThreshold , saltedPassword)
+		  poolLock.Leave // release the pool maintenance lock
+		  if createMediumOutcome.ok = true then createMediumOutcome.returnObject = nextFreeID // return the the id that was just created
+		  return createMediumOutcome
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Sub Destructor()
 		  if isnull(activeMedium) = False then activeMedium.close
 		  if isnull(activeVFS) = false then activeVFS.close
 		  
 		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
+		Private Function getFreeMediumID(poolname as string) As integer
+		  ErrorMsg = empty
+		  
+		  dim rs as RecordSet = activeVFS.SQLSelect("SELECT idx FROM media WHERE pool = '" + poolname + "' ORDER BY idx ASC")
+		  
+		  if activeVFS.Error = true then 
+		    ErrorMsg = "Database error while looking for a free medium ID: " + activeVFS.ErrorMessage
+		    return -1
+		  end if
+		  
+		  if rs.RecordCount = 0 then
+		    ErrorMsg = "Could not find any media for pool " + poolname
+		    Return -1
+		  end if
+		  
+		  dim counter as integer = 1
+		  while not rs.EOF
+		    if rs.IdxField(1).IntegerValue <> counter then exit while
+		    counter = counter + 1
+		    rs.MoveNext
+		  wend
+		  
+		  return counter
+		  
+		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
@@ -559,6 +627,31 @@ Protected Class Session
 		  end if
 		  
 		  Return empty  // success
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
+		Private Function testPoolPassword(poolname as string, saltedPassword as string) As pair
+		  // returns pair: left = error code (0=ok , 1= could not test , 2=probably no match) right = error message
+		  dim mediumInfo as Limnie.Medium = getMediumDetails(poolname , 1)  // passwords are tested against medium 1 of each pool
+		  if mediumInfo.error = true then return new pair(1 , "Error getting medium details: " + mediumInfo.errorMessage)
+		  
+		  dim testDB as new SQLiteDatabase
+		  testDB.DatabaseFile = mediumInfo.folder.Child(getFixedMediumFilename)
+		  testDB.EncryptionKey = saltedPassword
+		  
+		  if testDB.DatabaseFile = nil then return new pair(1 , "Invalid medium file path while verifying password for pool <" + poolname + ">")
+		  if testDB.DatabaseFile.Exists = false then return new pair(1 , "Missing medium file while verifying password for pool <" + poolname + ">")
+		  
+		  if testDB.Connect = False then 
+		    testDB.Close
+		    return new pair(2 , "Connection failed while verifying password for pool <" + poolname + ">")
+		  else // connection ok, password is correct
+		    testDB.close
+		    return new Pair(0 , empty)
+		  end if
+		  
 		  
 		End Function
 	#tag EndMethod

@@ -1,13 +1,15 @@
 #tag Class
 Protected Class Medium
 	#tag Method, Flags = &h0
-		Sub Constructor(optional initialErrorMessage as string)
+		Sub Constructor(optional initialErrorMessage as string = "", optional customErrorCode as Integer = 1)
 		  if initialErrorMessage.Trim = empty then
 		    error = False
 		    errorMessage = empty
+		    errorCode = 0
 		  else
 		    error = true
 		    errorMessage = initialErrorMessage
+		    errorCode = customErrorCode  // error code is needed in at least one method return this class
 		  end if
 		  
 		End Sub
@@ -16,6 +18,10 @@ Protected Class Medium
 
 	#tag Property, Flags = &h0
 		error As Boolean
+	#tag EndProperty
+
+	#tag Property, Flags = &h0
+		errorCode As Integer = 0
 	#tag EndProperty
 
 	#tag Property, Flags = &h0
@@ -98,6 +104,7 @@ Protected Class Medium
 			Name="pool"
 			Group="Behavior"
 			Type="String"
+			EditorType="MultiLineEditor"
 		#tag EndViewProperty
 		#tag ViewProperty
 			Name="open"
@@ -113,6 +120,7 @@ Protected Class Medium
 			Name="errorMessage"
 			Group="Behavior"
 			Type="String"
+			EditorType="MultiLineEditor"
 		#tag EndViewProperty
 		#tag ViewProperty
 			Name="error"
@@ -122,7 +130,8 @@ Protected Class Medium
 		#tag ViewProperty
 			Name="uuid"
 			Group="Behavior"
-			Type="Integer"
+			Type="String"
+			EditorType="MultiLineEditor"
 		#tag EndViewProperty
 	#tag EndViewBehavior
 End Class

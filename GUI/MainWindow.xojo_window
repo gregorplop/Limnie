@@ -1746,6 +1746,7 @@ Begin Window MainWindow
       End
    End
    Begin Timer RefreshTimer
+      Enabled         =   True
       Index           =   -2147483648
       LockedInPosition=   False
       Mode            =   0
@@ -1772,6 +1773,7 @@ Begin Window MainWindow
       Scope           =   0
       TabIndex        =   1
       TabPanelIndex   =   0
+      TabStop         =   True
       Top             =   501
       Transparent     =   True
       Visible         =   True
@@ -1872,6 +1874,11 @@ End
 
 	#tag Method, Flags = &h0
 		Function createLimnie() As Boolean
+		  if filenameField.Text.Trim = "" then 
+		    MsgBox "No VFS file specified!"
+		    return false
+		  end if
+		  
 		  dim newVFS as new Limnie.VFS
 		  
 		  newVFS.file = GetFolderItem(filenameField.Text.Trim)
@@ -1894,6 +1901,11 @@ End
 
 	#tag Method, Flags = &h0
 		Function createPool() As Boolean
+		  if rootFolderField_pool.Text.Trim = "" then
+		    MsgBox "No root folder specified!"
+		    return false
+		  end if
+		  
 		  dim newPool as new Limnie.Pool
 		  
 		  newPool.name = nameField_pool.Text.Trim
