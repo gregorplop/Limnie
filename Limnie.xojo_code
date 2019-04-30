@@ -63,8 +63,9 @@ Protected Module Limnie
 		  if newVFS.file.Exists = true then return new Limnie.VFS("Initialization file already exists, will not overwrite")
 		  if newVFS.file.Name.NthField("." , newVFS.file.Name.CountFields(".")).Lowercase <> "limnie" then return new Limnie.VFS("Filename should have a .limnie extension")
 		  
-		  newVFS.name =newVFS.name.SuperTrim
+		  newVFS.name =newVFS.name.SuperTrim(true)
 		  newVFS.friendlyname = newVFS.friendlyname.SuperTrim
+		  newVFS.description = newVFS.description.SuperTrim
 		  
 		  if newVFS.name = empty then return new Limnie.VFS("New Limnie has not been named")
 		  if newVFS.friendlyname = empty then return new Limnie.VFS("No friendly name for new Limnie")
@@ -281,11 +282,17 @@ Protected Module Limnie
 	#tag EndMethod
 
 	#tag Method, Flags = &h21
-		Private Function SuperTrim(extends inputString as String) As String
-		  dim output as String = inputString
-		  output = output.ReplaceAll(" " , empty)
+		Private Function SuperTrim(extends inputString as String, optional trimSpaces as Boolean = false) As String
+		  dim output as String = inputString.Trim
+		  
+		  if trimSpaces = true then
+		    output = output.ReplaceAll(" " , empty)
+		  end if
+		  
 		  output = output.ReplaceAll("'" , empty)
 		  output = output.ReplaceAll("""" , empty)
+		  output = output.ReplaceAll(";" , empty)
+		  
 		  Return output
 		  
 		End Function

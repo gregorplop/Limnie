@@ -1,13 +1,15 @@
 #tag Class
 Protected Class Document
 	#tag Method, Flags = &h0
-		Sub Constructor(optional initialErrorMessage as string)
+		Sub Constructor(optional initialErrorMessage as string = "", optional customErrorCode as Integer = 1)
 		  if initialErrorMessage.Trim = empty then
 		    error = False
 		    errorMessage = empty
+		    errorCode = 0
 		  else
 		    error = true
 		    errorMessage = initialErrorMessage
+		    errorCode = customErrorCode  // error code is needed in at least one method return this class
 		  end if
 		  
 		End Sub
@@ -37,6 +39,10 @@ Protected Class Document
 
 	#tag Property, Flags = &h0
 		error As Boolean
+	#tag EndProperty
+
+	#tag Property, Flags = &h0
+		errorCode As Integer
 	#tag EndProperty
 
 	#tag Property, Flags = &h0
@@ -115,9 +121,54 @@ Protected Class Document
 			Type="Integer"
 		#tag EndViewProperty
 		#tag ViewProperty
-			Name="creationStamp"
+			Name="deleted"
 			Group="Behavior"
-			Type="Integer"
+			Type="Boolean"
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="error"
+			Group="Behavior"
+			Type="Boolean"
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="errorMessage"
+			Group="Behavior"
+			Type="String"
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="fragmented"
+			Group="Behavior"
+			Type="Boolean"
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="hash"
+			Group="Behavior"
+			Type="String"
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="metadatum"
+			Group="Behavior"
+			Type="String"
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="objidx"
+			Group="Behavior"
+			Type="Int64"
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="pool"
+			Group="Behavior"
+			Type="string"
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="size"
+			Group="Behavior"
+			Type="Int64"
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="uuid"
+			Group="Behavior"
+			Type="string"
 		#tag EndViewProperty
 	#tag EndViewBehavior
 End Class

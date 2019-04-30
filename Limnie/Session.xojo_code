@@ -73,7 +73,7 @@ Protected Class Session
 		    Return
 		  end if
 		  if testvalue.StringValue = empty then 
-		    ErrorMsg = "Loaded file is not a valid VFS: No VFS name"
+		    ErrorMsg = "Loaded file is not a valid VFS: No VFS name!"
 		    activeVFS.Close
 		    activeVFS = nil
 		    return
@@ -87,7 +87,7 @@ Protected Class Session
 		    return
 		  end if
 		  if testvalue.StringValue = empty then 
-		    ErrorMsg = "Loaded file is not a valid VFS: No VFS version"
+		    ErrorMsg = "Loaded file is not a valid VFS: No VFS version!"
 		    activeVFS.Close
 		    activeVFS = nil
 		    Return
@@ -101,7 +101,7 @@ Protected Class Session
 		    return
 		  end if
 		  if testvalue.StringValue = empty then 
-		    ErrorMsg = "Loaded file is not a valid VFS: No init date"
+		    ErrorMsg = "Loaded file is not a valid VFS: No init date!"
 		    activeVFS.Close
 		    activeVFS = nil
 		    return
@@ -143,7 +143,29 @@ Protected Class Session
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
+		Function createDocument(source as Readable, poolname as string, metadata as String) As Limnie.Document
+		  if IsNull(source) then return new Limnie.Document("New document source is invalid!")
+		  dim poolDetails as Limnie.Pool = getPoolDetails(poolname)
+		  if poolDetails.error then return new Limnie.Document("New document pool could not be opened: " + poolDetails.errorMessage)
+		  
+		  
+		  
+		  // we now have the password to open media of this pool (if we need it)
+		  
+		  
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Function createNewPool(newPool as Limnie.Pool) As Limnie.Pool
+		  if IsNull(activeVFS) then return new Limnie.Pool("Session is not active!")
+		  if IsNull(newPool) then return new Limnie.Pool("New pool object is null")
+		  
+		  newPool.friendlyName = newPool.friendlyName.SuperTrim
+		  newPool.comments = newPool.comments.SuperTrim
+		  newPool.name = newPool.name.SuperTrim(true)
+		  
 		  newPool = initPool(newPool)
 		  if newPool.error then Return newPool  // something went wrong creating the pool in the VFS: fail
 		  
@@ -155,26 +177,21 @@ Protected Class Session
 		  // we are going to create the first medium of the pool: we cannot have a pool without at least 1 medium,
 		  // especially a password-pretected pool: the medium db is the only place where the password is applied and can be compared against: it exists nowhere else
 		  
-		  dim poolInfo as Limnie.Pool = getPoolDetails(newPool.name)  // read details of the pool that has just been created
-		  
-		  if poolInfo.error = true then 
-		    dim rollbackOK as string = rollbackInitPool(newPool.name)
-		    return new Limnie.Pool("Error retrieving info on the newly created pool: " + poolInfo.errorMessage + if(rollbackOK = empty , " : Creation rollback OK" , rollbackOK))
-		  end if
+		  //dim poolInfo as Limnie.Pool = getPoolDetails(newPool.name)  // SHIT! I LOSE THE PASSWORD HERE
 		  
 		  dim saltedPassword as string 
-		  saltedPassword = if(poolInfo.salt = empty , empty , preparePassword(poolPasswords.Value(poolInfo.name).StringValue , poolInfo.salt))
+		  saltedPassword = if(newPool.salt = empty , empty , preparePassword(newPool.password , newPool.salt))
 		  
-		  dim firstMedium as Limnie.Medium = initMedium(poolInfo.name , 1 , poolInfo.rootFolder , poolInfo.mediumThreshold , saltedPassword)
+		  dim firstMedium as Limnie.Medium = initMedium(newPool.name , 1 , newPool.rootFolder , newPool.mediumThreshold , saltedPassword)
 		  
 		  if firstMedium.error then
 		    dim rollbackOK as string = rollbackInitPool(newPool.name)
 		    return new Limnie.Pool("Error creating first pool medium: " + firstMedium.errorMessage + if(rollbackOK = empty , " : Creation rollback OK" , rollbackOK))
 		  end if
 		  
-		  poolInfo.mediaCount = 1  // we've already made one, let's not return an inaccurate piece of info!
+		  newPool.mediaCount = 1  // we've already made one, let's not return an inaccurate piece of info!
 		  
-		  return poolInfo // success
+		  return newPool // success
 		  
 		End Function
 	#tag EndMethod
@@ -188,34 +205,66 @@ Protected Class Session
 		  
 		  dim poolLock as new Mutex(pooldetails.uuid)
 		  if poolLock.TryEnter = false then Return new Limnie.Medium("Pool " + poolname + " locked for maintenance" , 2)  // error code 2 is to differentiate this failure from an infrastructure failure: it means TRY LATER, rather than IT BLEW UP, FORGET IT
+		  // be careful of the pool lock: if the application crashes before releasing it, no other client will be able to add a medium until the lock has been manually reset!
 		  
 		  // at this point we have successfully locked the pool for maintenance
-		  
 		  dim nextFreeID as integer = getFreeMediumID(poolname)
 		  if nextFreeID < 0 then 
 		    poolLock.Leave
 		    return new Limnie.Medium("Error getting free medium ID: " + ErrorMsg)
 		  end if
 		  
-		  // we have a free id and we know nobody else is going to reserve it
+		  // we have a free id and we know/hope nobody else is going to reserve it
 		  
-		  if pooldetails.encrypted = true then  // we need to find the password
+		  dim saltedPassword as String = empty
+		  dim plainPassword as string = empty
+		  if pooldetails.encrypted = true then  // the pool is configured to be encrypted; we need to find the password
 		    dim verifyOK as pair
-		    if poolPasswords.HasKey("poolname") then // there's a password in the pool password cache, let's verify it
-		      verifyOK = testPoolPassword(poolname , poolPasswords.Value("poolname"))
-		      
-		      
+		    if poolPasswords.HasKey(poolname) then // there's a password in the pool password cache, let's verify it
+		      verifyOK = testPoolPassword(poolname , poolPasswords.Value(poolname).StringValue)
+		      select case verifyOK.Left.IntegerValue
+		      case 0  // all ok --cached password is correct
+		        saltedPassword = poolPasswords.Value(poolname).StringValue
+		      case 1  // infrastructure failure
+		        poolLock.Leave
+		        return new Limnie.Medium("Error verifying cached password for creating next encrypted medium: " + verifyOK.Right.StringValue , 1)
+		      case 2 // password mismatch (or db corruption, but we can't really tell the difference)
+		        poolPasswords.Remove(poolname)  // this is incorrect, no reason to keep cached
+		      else  // isn't supposed to happen
+		        poolLock.Leave
+		        Return new Limnie.Medium("Internal error!")
+		      end select
 		    end if
-		    
-		    
+		    if saltedPassword = empty then // we need to attemt asking the outside world for the password
+		      plainPassword = RaiseEvent poolPasswordRequest(poolname)
+		      
+		      if plainPassword = empty then 
+		        poolLock.Leave
+		        Return new Limnie.Medium("Encrypted pool password requested but not received!")
+		      end if
+		      saltedPassword = preparePassword(plainPassword , pooldetails.salt)  // we got something, but we're not sure if it's correct
+		      verifyOK = testPoolPassword(poolname , saltedPassword)
+		      select case verifyOK.Left.IntegerValue
+		      case 0  // all ok
+		        poolPasswords.Value(poolname) = saltedPassword   // cache the password
+		      case 1  // infrastructure failure
+		        poolLock.Leave
+		        return new Limnie.Medium("Error verifying requested password for creating next encrypted medium: " + verifyOK.Right.StringValue , 1)
+		      case 2 // password mismatch (or db corruption, but we can't really tell the difference)
+		        poolLock.Leave
+		        Return new Limnie.Medium("Password not verified!" , 2)
+		      else  // isn't supposed to happen
+		        poolLock.Leave
+		        Return new Limnie.Medium("Internal error!")
+		      end select
+		    end if
 		  end if
 		  
-		  
-		  
-		  dim createMediumOutcome as pdOutcome = initMedium(poolname , nextFreeID , poolInfo.rootFolder , poolInfo.mediumThreshold , saltedPassword)
+		  dim newMedium as Limnie.Medium = initMedium(poolname , nextFreeID , pooldetails.rootFolder , pooldetails.mediumThreshold , saltedPassword)
 		  poolLock.Leave // release the pool maintenance lock
-		  if createMediumOutcome.ok = true then createMediumOutcome.returnObject = nextFreeID // return the the id that was just created
-		  return createMediumOutcome
+		  
+		  return newMedium
+		  
 		  
 		End Function
 	#tag EndMethod
@@ -226,6 +275,12 @@ Protected Class Session
 		  if isnull(activeVFS) = false then activeVFS.close
 		  
 		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
+		Private Function generateSalt() As string
+		  Return EncodeHex(MD5(str(Microseconds)))
+		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h21
@@ -573,7 +628,7 @@ Protected Class Session
 		  if newPool.password.Trim = empty then
 		    insert = insert + " null )"
 		  else // user has supplied a password - a salt will be created and the password will be stored for the current session
-		    salt = MD5(str(Microseconds))   // <-observe how the salt for each pool is created
+		    salt = generateSalt
 		    insert = insert + salt.sqlQuote + ")"
 		  end if
 		  
@@ -598,6 +653,7 @@ Protected Class Session
 		  // store the password in the cache
 		  if newPool.password.Trim <> empty then 
 		    poolPasswords.Value(newPool.name) = preparePassword(newPool.password.Trim , salt)
+		    newPool.salt = salt   // and notice that at this point newPool.password is carrying the user-defined plaintext password
 		    // store the password for the duration of the current session
 		  end if
 		  
@@ -634,11 +690,12 @@ Protected Class Session
 	#tag Method, Flags = &h21
 		Private Function testPoolPassword(poolname as string, saltedPassword as string) As pair
 		  // returns pair: left = error code (0=ok , 1= could not test , 2=probably no match) right = error message
+		  
 		  dim mediumInfo as Limnie.Medium = getMediumDetails(poolname , 1)  // passwords are tested against medium 1 of each pool
 		  if mediumInfo.error = true then return new pair(1 , "Error getting medium details: " + mediumInfo.errorMessage)
 		  
 		  dim testDB as new SQLiteDatabase
-		  testDB.DatabaseFile = mediumInfo.folder.Child(getFixedMediumFilename)
+		  testDB.DatabaseFile = mediumInfo.folder.Child(mediumFilename)
 		  testDB.EncryptionKey = saltedPassword
 		  
 		  if testDB.DatabaseFile = nil then return new pair(1 , "Invalid medium file path while verifying password for pool <" + poolname + ">")
@@ -652,6 +709,48 @@ Protected Class Session
 		    return new Pair(0 , empty)
 		  end if
 		  
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function updatePool(targetPool as Limnie.Pool) As Limnie.Pool
+		  // this method can update the following:
+		  // pool.friendlyName , pool.comments , pool.rootFolder , pool.mediumThreshold , pool.autoExpand
+		  // it goes without saying that update is not retroactive: it will have no effect on media created prior to it
+		  
+		  if IsNull(activeVFS) then return new Limnie.Pool("Session is not active!")
+		  if IsNull(targetPool) then return new Limnie.Pool("Target pool object is null")
+		  
+		  if getPoolNames.IndexOf(targetPool.name) < 0 then Return new Limnie.Pool("Error updating pool " + targetPool.name + " : Does not seem to exist!")
+		  
+		  if IsNull(targetPool.rootFolder) then return new Limnie.Pool("New root path is invalid!")
+		  if targetPool.rootFolder.Exists = false then return new Limnie.Pool("New target root does not exist!")
+		  if targetPool.rootFolder.IsReadable = False then return new Limnie.Pool("New target root is not readable!")
+		  if targetPool.rootFolder.IsWriteable = false then Return new Limnie.Pool("New target root is not writeable!")
+		  if targetPool.rootFolder.Directory = false then return new Limnie.Pool("New target root is not a directory!")
+		  
+		  if targetPool.mediumThreshold < 512 then return new Limnie.Pool("New medium threshold should be at least 512 MB")
+		  
+		  targetPool.comments = targetPool.comments.SuperTrim
+		  targetPool.friendlyName = targetPool.friendlyName.SuperTrim
+		  
+		  // code maybe succeptible to sql injection -- marked for improvement
+		  dim updateStatement as string = "UPDATE pools SET "
+		  
+		  updateStatement = updateStatement + "friendlyname = " + targetPool.friendlyName.sqlQuote + " , "
+		  updateStatement = updateStatement + "comments = " + targetPool.comments.sqlQuote + " , "
+		  updateStatement = updateStatement + "rootfolder = " + targetPool.rootFolder.NativePath.sqlQuote + " , "
+		  updateStatement = updateStatement + "sizelimit = " + str(targetPool.mediumThreshold) + " , "
+		  updateStatement = updateStatement + "autoexpand = " + targetPool.autoExpand.sqlQuote 
+		  
+		  updateStatement = updateStatement + " WHERE name = " + targetPool.name.sqlQuote
+		  
+		  activeVFS.SQLExecute(updateStatement)
+		  
+		  if activeVFS.Error then return new Limnie.Pool("Error updating pool details: " + activeVFS.ErrorMessage)
+		  
+		  return targetPool
 		  
 		End Function
 	#tag EndMethod

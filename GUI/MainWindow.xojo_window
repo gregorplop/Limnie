@@ -21,7 +21,7 @@ Begin Window MainWindow
    MinHeight       =   530
    MinimizeButton  =   True
    MinWidth        =   888
-   Placement       =   0
+   Placement       =   2
    Resizeable      =   True
    Title           =   "LimnieGUI"
    Visible         =   True
@@ -132,7 +132,7 @@ Begin Window MainWindow
          BackColor       =   &cFFFFFF00
          Bold            =   False
          Border          =   True
-         CueText         =   ""
+         CueText         =   "C:\\Limnie\\vfs.limnie"
          DataField       =   ""
          DataSource      =   ""
          Enabled         =   True
@@ -1744,9 +1744,92 @@ Begin Window MainWindow
          Visible         =   True
          Width           =   114
       End
+      Begin Listbox MediaList
+         AutoDeactivate  =   True
+         AutoHideScrollbars=   True
+         Bold            =   False
+         Border          =   True
+         ColumnCount     =   1
+         ColumnsResizable=   False
+         ColumnWidths    =   ""
+         DataField       =   ""
+         DataSource      =   ""
+         DefaultRowHeight=   -1
+         Enabled         =   True
+         EnableDrag      =   False
+         EnableDragReorder=   False
+         GridLinesHorizontal=   0
+         GridLinesVertical=   0
+         HasHeading      =   False
+         HeadingIndex    =   -1
+         Height          =   352
+         HelpTag         =   ""
+         Hierarchical    =   False
+         Index           =   -2147483648
+         InitialParent   =   "MainPanel"
+         InitialValue    =   ""
+         Italic          =   False
+         Left            =   40
+         LockBottom      =   True
+         LockedInPosition=   False
+         LockLeft        =   True
+         LockRight       =   True
+         LockTop         =   True
+         RequiresSelection=   False
+         Scope           =   0
+         ScrollbarHorizontal=   False
+         ScrollBarVertical=   True
+         SelectionType   =   0
+         ShowDropIndicator=   False
+         TabIndex        =   0
+         TabPanelIndex   =   3
+         TabStop         =   True
+         TextFont        =   "System"
+         TextSize        =   16.0
+         TextUnit        =   0
+         Top             =   77
+         Transparent     =   False
+         Underline       =   False
+         UseFocusRing    =   True
+         Visible         =   True
+         Width           =   900
+         _ScrollOffset   =   0
+         _ScrollWidth    =   -1
+      End
+      Begin PushButton PushButton1
+         AutoDeactivate  =   True
+         Bold            =   False
+         ButtonStyle     =   "0"
+         Cancel          =   False
+         Caption         =   "Button"
+         Default         =   False
+         Enabled         =   True
+         Height          =   36
+         HelpTag         =   ""
+         Index           =   -2147483648
+         InitialParent   =   "MainPanel"
+         Italic          =   False
+         Left            =   213
+         LockBottom      =   False
+         LockedInPosition=   False
+         LockLeft        =   True
+         LockRight       =   False
+         LockTop         =   True
+         Scope           =   0
+         TabIndex        =   0
+         TabPanelIndex   =   4
+         TabStop         =   True
+         TextFont        =   "System"
+         TextSize        =   16.0
+         TextUnit        =   0
+         Top             =   148
+         Transparent     =   False
+         Underline       =   False
+         Visible         =   True
+         Width           =   136
+      End
    End
    Begin Timer RefreshTimer
-      Enabled         =   True
       Index           =   -2147483648
       LockedInPosition=   False
       Mode            =   0
@@ -1773,7 +1856,6 @@ Begin Window MainWindow
       Scope           =   0
       TabIndex        =   1
       TabPanelIndex   =   0
-      TabStop         =   True
       Top             =   501
       Transparent     =   True
       Visible         =   True
@@ -1864,6 +1946,8 @@ End
 
 	#tag Method, Flags = &h0
 		Sub CloseLimnie()
+		  RemoveHandler activeSession.poolPasswordRequest , WeakAddressOf poolPasswordRequest_handler
+		  
 		  activeSession.Close
 		  
 		  setState(UIstates.noVFSopen)
@@ -1912,7 +1996,7 @@ End
 		  newPool.friendlyName = friendlyNameField_pool.Text.Trim
 		  newPool.comments = commentsField_pool.Text.Trim
 		  newPool.rootFolder = GetFolderItem(rootFolderField_pool.Text.Trim)
-		  newPool.password = passwordField_pool.Text.Trim
+		  newPool.password = passwordField_pool.Text.Trim  // PLAINTEXT PRELIMINARY!
 		  newPool.mediumThreshold = thresholdField_pool.Text.Trim.Val
 		  newPool.autoExpand = AutoExpandCheck_pool.Value
 		  
@@ -1978,15 +2062,27 @@ End
 		      uuidField.Text = openVFS.uuid
 		      versionField.Text = openVFS.version
 		      
+		      AddHandler activeSession.poolPasswordRequest , WeakAddressOf poolPasswordRequest_handler
+		      
 		      Return true
 		      
 		    else
 		      SessionIndicator.FillColor = RGB(255,0,0)
 		      MsgBox openVFS.errorMessage
 		      CloseLimnie
+		      Return false
 		    end if
 		    
 		  end if
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function poolPasswordRequest_handler(sender as Limnie.Session, poolname as string) As string
+		  dim value as Variant = InputWindow.showInput("Password for pool " + poolname , "Enter password to unlock pool " + poolname)
+		  
+		  return value.StringValue
 		  
 		End Function
 	#tag EndMethod
@@ -2021,13 +2117,24 @@ End
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
+		Sub RefreshStart()
+		  RefreshTimer.Mode = Timer.ModeMultiple
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub RefreshStop()
+		  RefreshTimer.Mode = Timer.ModeOff
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Sub setState(state as UIstates)
 		  select case state
 		    
 		  case UIstates.noVFSopen
 		    
-		    RefreshTimer.Mode = timer.ModeOff
-		    
+		    RefreshStop
 		    clearPanels
 		    
 		    SessionIndicator.FillColor = RGB(255,255,255)
@@ -2056,7 +2163,7 @@ End
 		    
 		    PoolList.ListIndex = 0
 		    
-		    RefreshTimer.Mode = timer.ModeMultiple
+		    RefreshStart
 		    
 		  end select
 		  
@@ -2109,6 +2216,12 @@ End
 		  select case asc(key)
 		    
 		  case 3,13
+		    
+		    if me.Text.Trim = "" then
+		      me.Text = me.CueText
+		      return true
+		    end if
+		    
 		    call openLimnie
 		    return true
 		  else
@@ -2249,6 +2362,22 @@ End
 #tag Events updatePoolBtn
 	#tag Event
 		Sub Action()
+		  dim pooldata2update as new Limnie.Pool
+		  
+		  pooldata2update.name = nameField_pool.Text
+		  pooldata2update.friendlyName = friendlyNameField_pool.Text
+		  pooldata2update.comments = commentsField_pool.Text
+		  pooldata2update.mediumThreshold = thresholdField_pool.Text.Val
+		  pooldata2update.rootFolder = GetFolderItem(rootFolderField_pool.Text)
+		  pooldata2update.autoExpand = AutoExpandCheck_pool.Value
+		  
+		  pooldata2update = activeSession.updatePool(pooldata2update)
+		  
+		  if pooldata2update.error then 
+		    MsgBox pooldata2update.errorMessage
+		    PoolList.ListIndex = PoolList.ListIndex
+		  end if
+		  
 		  
 		End Sub
 	#tag EndEvent
@@ -2263,6 +2392,33 @@ End
 #tag Events newMediumBtn
 	#tag Event
 		Sub Action()
+		  dim row as Integer = PoolList.ListIndex
+		  if row < 0 then
+		    me.Enabled = false
+		    return
+		  end if
+		  
+		  if PoolList.cell(row,0) = "<NEW>" then
+		    me.Enabled = false
+		    return
+		  end if
+		  
+		  RefreshStop
+		  dim createNext as Limnie.Medium = activeSession.createNextMedium(PoolList.cell(row,0) , false)  // we do not autoexpand
+		  
+		  if createNext.error then 
+		    MsgBox "Error creating next medium: " + createNext.errorMessage
+		  end if
+		  
+		  call refreshPoolList
+		  RefreshStart
+		  
+		End Sub
+	#tag EndEvent
+#tag EndEvents
+#tag Events MediaList
+	#tag Event
+		Sub Open()
 		  
 		End Sub
 	#tag EndEvent
