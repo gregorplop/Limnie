@@ -143,7 +143,7 @@ Protected Class Session
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function createDocument(source as Readable, poolname as string, metadata as String) As Limnie.Document
+		Function createDocument(source as Readable, poolname as string, metadata as String, optional yielding as Boolean = false) As Limnie.Document
 		  if IsNull(source) then return new Limnie.Document("New document source is invalid!")
 		  dim poolDetails as Limnie.Pool = getPoolDetails(poolname)
 		  if poolDetails.error then return new Limnie.Document("New document pool could not be opened: " + poolDetails.errorMessage)
@@ -318,6 +318,44 @@ Protected Class Session
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
+		Function getMediaDetails(WHERE as String, ORDERBY as string) As Limnie.Medium()
+		  // for infrastructure error method return one element on error state with error code = -1
+		  dim output(-1) as Limnie.Medium
+		  dim currentMedium as Limnie.Medium
+		  
+		  if IsNull(activeVFS) then Return Array(new Limnie.Medium("VFS not initialized!" , -1))
+		  
+		  if WHERE = empty then WHERE = "TRUE"
+		  if ORDERBY = empty then ORDERBY = "pool , idx ASC"
+		  
+		  dim query as string = "SELECT * FROM media WHERE " + WHERE + " " + ORDERBY
+		  
+		  dim rs as RecordSet = activeVFS.SQLSelect(query)
+		  if activeVFS.Error = true then Return Array(new Limnie.Medium("Error surveying media files: " + activeVFS.ErrorMessage))
+		  
+		  dim ErrorMessage as string
+		  
+		  while not rs.EOF
+		    
+		    currentMedium = getMediumDetails(rs.Field("pool").StringValue , rs.Field("idx").IntegerValue)
+		    
+		    if currentMedium.error = true then
+		      ErrorMessage = currentMedium.errorMessage
+		      currentMedium = new Limnie.Medium(ErrorMessage)
+		      currentMedium.idx = rs.Field("idx").IntegerValue
+		      currentMedium.pool = rs.Field("pool").StringValue
+		      currentMedium.uuid = rs.Field("uuid").StringValue
+		    end if
+		    
+		    output.Append currentMedium
+		    rs.MoveNext
+		  wend
+		  
+		  return output
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Function getMediumDetails(poolname as string, mediumID as integer) As Limnie.Medium
 		  if activeVFS = nil then return new Limnie.Medium("VFS not initialized!")
 		  
@@ -341,6 +379,15 @@ Protected Class Session
 		  output.initStamp = rs.Field("initstamp").DateValue
 		  output.open = rs.Field("open").BooleanValue
 		  output.uuid = rs.Field("uuid").StringValue
+		  
+		  dim shm_filename as String = mediumFilename + "-shm"
+		  dim wal_filename as string = mediumFilename + "-wal"
+		  output.mounted = output.folder.Child(shm_filename).Exists and output.folder.Child(wal_filename).Exists  // this is a global metric, ie it show if medium has been mounted by *ANY* application running on the server
+		  
+		  output.size = output.file.Length
+		  
+		  dim maxBytesize as Int64 = output.threshold * MByte
+		  output.utilization = Round((output.size * 100) / maxBytesize)
 		  
 		  
 		  return output

@@ -45,6 +45,10 @@ Protected Class Medium
 	#tag EndProperty
 
 	#tag Property, Flags = &h0
+		mounted As Boolean
+	#tag EndProperty
+
+	#tag Property, Flags = &h0
 		open As Boolean
 	#tag EndProperty
 
@@ -53,7 +57,15 @@ Protected Class Medium
 	#tag EndProperty
 
 	#tag Property, Flags = &h0
+		size As Int64
+	#tag EndProperty
+
+	#tag Property, Flags = &h0
 		threshold As int64
+	#tag EndProperty
+
+	#tag Property, Flags = &h0
+		utilization As Integer
 	#tag EndProperty
 
 	#tag Property, Flags = &h0
@@ -132,6 +144,12 @@ Protected Class Medium
 			Group="Behavior"
 			Type="String"
 			EditorType="MultiLineEditor"
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="errorCode"
+			Group="Behavior"
+			InitialValue="0"
+			Type="Integer"
 		#tag EndViewProperty
 	#tag EndViewBehavior
 End Class

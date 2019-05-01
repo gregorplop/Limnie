@@ -9,7 +9,7 @@ Begin Window MainWindow
    FullScreen      =   False
    FullScreenButton=   False
    HasBackColor    =   False
-   Height          =   530
+   Height          =   580
    ImplicitInstance=   True
    LiveResize      =   True
    MacProcID       =   0
@@ -30,7 +30,7 @@ Begin Window MainWindow
       AutoDeactivate  =   True
       Bold            =   False
       Enabled         =   True
-      Height          =   473
+      Height          =   523
       HelpTag         =   ""
       Index           =   -2147483648
       InitialParent   =   ""
@@ -54,7 +54,7 @@ Begin Window MainWindow
       Top             =   20
       Transparent     =   False
       Underline       =   False
-      Value           =   1
+      Value           =   2
       Visible         =   True
       Width           =   940
       Begin PushButton CreateVFSbtn
@@ -882,7 +882,7 @@ Begin Window MainWindow
          GridLinesVertical=   0
          HasHeading      =   False
          HeadingIndex    =   -1
-         Height          =   347
+         Height          =   397
          HelpTag         =   ""
          Hierarchical    =   False
          Index           =   -2147483648
@@ -942,7 +942,7 @@ Begin Window MainWindow
          TextFont        =   "System"
          TextSize        =   14.0
          TextUnit        =   0
-         Top             =   436
+         Top             =   486
          Transparent     =   False
          Underline       =   False
          Visible         =   True
@@ -1674,7 +1674,7 @@ Begin Window MainWindow
          TextFont        =   "System"
          TextSize        =   14.0
          TextUnit        =   0
-         Top             =   436
+         Top             =   486
          Transparent     =   False
          Underline       =   False
          Visible         =   True
@@ -1706,7 +1706,7 @@ Begin Window MainWindow
          TextFont        =   "System"
          TextSize        =   14.0
          TextUnit        =   0
-         Top             =   436
+         Top             =   486
          Transparent     =   False
          Underline       =   False
          Visible         =   True
@@ -1738,7 +1738,7 @@ Begin Window MainWindow
          TextFont        =   "System"
          TextSize        =   14.0
          TextUnit        =   0
-         Top             =   436
+         Top             =   486
          Transparent     =   False
          Underline       =   False
          Visible         =   True
@@ -1762,7 +1762,7 @@ Begin Window MainWindow
          GridLinesVertical=   0
          HasHeading      =   False
          HeadingIndex    =   -1
-         Height          =   352
+         Height          =   403
          HelpTag         =   ""
          Hierarchical    =   False
          Index           =   -2147483648
@@ -1796,37 +1796,532 @@ Begin Window MainWindow
          _ScrollOffset   =   0
          _ScrollWidth    =   -1
       End
-      Begin PushButton PushButton1
+      Begin PushButton ShowAllPoolMediaBtn
          AutoDeactivate  =   True
          Bold            =   False
          ButtonStyle     =   "0"
          Cancel          =   False
-         Caption         =   "Button"
+         Caption         =   "Show All Pools"
          Default         =   False
          Enabled         =   True
-         Height          =   36
+         Height          =   31
          HelpTag         =   ""
          Index           =   -2147483648
          InitialParent   =   "MainPanel"
          Italic          =   False
-         Left            =   213
-         LockBottom      =   False
+         Left            =   40
+         LockBottom      =   True
          LockedInPosition=   False
          LockLeft        =   True
          LockRight       =   False
+         LockTop         =   False
+         Scope           =   0
+         TabIndex        =   1
+         TabPanelIndex   =   3
+         TabStop         =   True
+         TextFont        =   "System"
+         TextSize        =   14.0
+         TextUnit        =   0
+         Top             =   492
+         Transparent     =   False
+         Underline       =   False
+         Visible         =   True
+         Width           =   150
+      End
+      Begin PopupMenu FilterOpenClosedMediaMenu
+         AutoDeactivate  =   True
+         Bold            =   False
+         DataField       =   ""
+         DataSource      =   ""
+         Enabled         =   True
+         Height          =   25
+         HelpTag         =   ""
+         Index           =   -2147483648
+         InitialParent   =   "MainPanel"
+         InitialValue    =   ""
+         Italic          =   False
+         Left            =   202
+         ListIndex       =   0
+         LockBottom      =   True
+         LockedInPosition=   False
+         LockLeft        =   True
+         LockRight       =   False
+         LockTop         =   False
+         Scope           =   0
+         TabIndex        =   4
+         TabPanelIndex   =   3
+         TabStop         =   True
+         TextFont        =   "System"
+         TextSize        =   16.0
+         TextUnit        =   0
+         Top             =   493
+         Transparent     =   False
+         Underline       =   False
+         Visible         =   True
+         Width           =   124
+      End
+      Begin PushButton MarkAsClosedBtn
+         AutoDeactivate  =   True
+         Bold            =   False
+         ButtonStyle     =   "0"
+         Cancel          =   False
+         Caption         =   "Mark as Closed"
+         Default         =   False
+         Enabled         =   True
+         Height          =   31
+         HelpTag         =   "A closed medium will not accept any more objects"
+         Index           =   -2147483648
+         InitialParent   =   "MainPanel"
+         Italic          =   False
+         Left            =   790
+         LockBottom      =   True
+         LockedInPosition=   False
+         LockLeft        =   False
+         LockRight       =   True
+         LockTop         =   False
+         Scope           =   0
+         TabIndex        =   5
+         TabPanelIndex   =   3
+         TabStop         =   True
+         TextFont        =   "System"
+         TextSize        =   14.0
+         TextUnit        =   0
+         Top             =   492
+         Transparent     =   False
+         Underline       =   False
+         Visible         =   True
+         Width           =   150
+      End
+      Begin GroupBox ImportSingleFileGroup
+         AutoDeactivate  =   True
+         Bold            =   False
+         Caption         =   "Import Single File (non-threaded)"
+         Enabled         =   True
+         Height          =   151
+         HelpTag         =   ""
+         Index           =   -2147483648
+         InitialParent   =   "MainPanel"
+         Italic          =   False
+         Left            =   40
+         LockBottom      =   False
+         LockedInPosition=   False
+         LockLeft        =   True
+         LockRight       =   True
          LockTop         =   True
          Scope           =   0
-         TabIndex        =   0
+         TabIndex        =   1
          TabPanelIndex   =   4
          TabStop         =   True
          TextFont        =   "System"
          TextSize        =   16.0
          TextUnit        =   0
-         Top             =   148
+         Top             =   77
          Transparent     =   False
          Underline       =   False
          Visible         =   True
-         Width           =   136
+         Width           =   900
+         Begin Label SingleImport2poolLabel
+            AutoDeactivate  =   True
+            Bold            =   False
+            DataField       =   ""
+            DataSource      =   ""
+            Enabled         =   True
+            Height          =   30
+            HelpTag         =   ""
+            Index           =   -2147483648
+            InitialParent   =   "ImportSingleFileGroup"
+            Italic          =   False
+            Left            =   60
+            LockBottom      =   False
+            LockedInPosition=   False
+            LockLeft        =   True
+            LockRight       =   False
+            LockTop         =   True
+            Multiline       =   False
+            Scope           =   0
+            Selectable      =   False
+            TabIndex        =   0
+            TabPanelIndex   =   4
+            TabStop         =   True
+            Text            =   "Pool"
+            TextAlign       =   0
+            TextColor       =   &c00000000
+            TextFont        =   "System"
+            TextSize        =   16.0
+            TextUnit        =   0
+            Top             =   113
+            Transparent     =   True
+            Underline       =   False
+            Visible         =   True
+            Width           =   126
+         End
+         Begin PopupMenu SingleImport2PoolMenu
+            AutoDeactivate  =   True
+            Bold            =   False
+            DataField       =   ""
+            DataSource      =   ""
+            Enabled         =   True
+            Height          =   30
+            HelpTag         =   ""
+            Index           =   -2147483648
+            InitialParent   =   "ImportSingleFileGroup"
+            InitialValue    =   ""
+            Italic          =   False
+            Left            =   60
+            ListIndex       =   0
+            LockBottom      =   False
+            LockedInPosition=   False
+            LockLeft        =   True
+            LockRight       =   False
+            LockTop         =   True
+            Scope           =   0
+            TabIndex        =   2
+            TabPanelIndex   =   4
+            TabStop         =   True
+            TextFont        =   "System"
+            TextSize        =   16.0
+            TextUnit        =   0
+            Top             =   145
+            Transparent     =   False
+            Underline       =   False
+            Visible         =   True
+            Width           =   126
+         End
+         Begin TextField SingleImportSourceFileField
+            AcceptTabs      =   False
+            Alignment       =   0
+            AutoDeactivate  =   True
+            AutomaticallyCheckSpelling=   False
+            BackColor       =   &cFFFFFF00
+            Bold            =   False
+            Border          =   True
+            CueText         =   ""
+            DataField       =   ""
+            DataSource      =   ""
+            Enabled         =   True
+            Format          =   ""
+            Height          =   30
+            HelpTag         =   "Right click to select file"
+            Index           =   -2147483648
+            InitialParent   =   "ImportSingleFileGroup"
+            Italic          =   False
+            Left            =   198
+            LimitText       =   0
+            LockBottom      =   False
+            LockedInPosition=   False
+            LockLeft        =   True
+            LockRight       =   False
+            LockTop         =   True
+            Mask            =   ""
+            Password        =   False
+            ReadOnly        =   False
+            Scope           =   0
+            TabIndex        =   3
+            TabPanelIndex   =   4
+            TabStop         =   True
+            Text            =   ""
+            TextColor       =   &c00000000
+            TextFont        =   "System"
+            TextSize        =   16.0
+            TextUnit        =   0
+            Top             =   145
+            Transparent     =   False
+            Underline       =   False
+            UseFocusRing    =   True
+            Visible         =   True
+            Width           =   201
+         End
+         Begin TextField SingleImportMetadataField
+            AcceptTabs      =   False
+            Alignment       =   0
+            AutoDeactivate  =   True
+            AutomaticallyCheckSpelling=   False
+            BackColor       =   &cFFFFFF00
+            Bold            =   False
+            Border          =   True
+            CueText         =   ""
+            DataField       =   ""
+            DataSource      =   ""
+            Enabled         =   True
+            Format          =   ""
+            Height          =   30
+            HelpTag         =   ""
+            Index           =   -2147483648
+            InitialParent   =   "ImportSingleFileGroup"
+            Italic          =   False
+            Left            =   411
+            LimitText       =   0
+            LockBottom      =   False
+            LockedInPosition=   False
+            LockLeft        =   True
+            LockRight       =   False
+            LockTop         =   True
+            Mask            =   ""
+            Password        =   False
+            ReadOnly        =   False
+            Scope           =   0
+            TabIndex        =   5
+            TabPanelIndex   =   4
+            TabStop         =   True
+            Text            =   ""
+            TextColor       =   &c00000000
+            TextFont        =   "System"
+            TextSize        =   16.0
+            TextUnit        =   0
+            Top             =   145
+            Transparent     =   False
+            Underline       =   False
+            UseFocusRing    =   True
+            Visible         =   True
+            Width           =   160
+         End
+         Begin PushButton ImportSingleFileBtn
+            AutoDeactivate  =   True
+            Bold            =   False
+            ButtonStyle     =   "0"
+            Cancel          =   False
+            Caption         =   "Import"
+            Default         =   False
+            Enabled         =   True
+            Height          =   30
+            HelpTag         =   ""
+            Index           =   -2147483648
+            InitialParent   =   "ImportSingleFileGroup"
+            Italic          =   False
+            Left            =   784
+            LockBottom      =   False
+            LockedInPosition=   False
+            LockLeft        =   False
+            LockRight       =   True
+            LockTop         =   True
+            Scope           =   0
+            TabIndex        =   6
+            TabPanelIndex   =   4
+            TabStop         =   True
+            TextFont        =   "System"
+            TextSize        =   14.0
+            TextUnit        =   0
+            Top             =   145
+            Transparent     =   False
+            Underline       =   False
+            Visible         =   True
+            Width           =   136
+         End
+         Begin TextField SingleImportUUIDfield
+            AcceptTabs      =   False
+            Alignment       =   0
+            AutoDeactivate  =   True
+            AutomaticallyCheckSpelling=   False
+            BackColor       =   &cFFFFFF00
+            Bold            =   False
+            Border          =   True
+            CueText         =   ""
+            DataField       =   ""
+            DataSource      =   ""
+            Enabled         =   True
+            Format          =   ""
+            Height          =   30
+            HelpTag         =   ""
+            Index           =   -2147483648
+            InitialParent   =   "ImportSingleFileGroup"
+            Italic          =   False
+            Left            =   583
+            LimitText       =   0
+            LockBottom      =   False
+            LockedInPosition=   False
+            LockLeft        =   True
+            LockRight       =   True
+            LockTop         =   True
+            Mask            =   ""
+            Password        =   False
+            ReadOnly        =   False
+            Scope           =   0
+            TabIndex        =   8
+            TabPanelIndex   =   4
+            TabStop         =   True
+            Text            =   ""
+            TextColor       =   &c00000000
+            TextFont        =   "System"
+            TextSize        =   16.0
+            TextUnit        =   0
+            Top             =   145
+            Transparent     =   False
+            Underline       =   False
+            UseFocusRing    =   True
+            Visible         =   True
+            Width           =   189
+         End
+         Begin Label SingleImportSourceFileLabel
+            AutoDeactivate  =   True
+            Bold            =   False
+            DataField       =   ""
+            DataSource      =   ""
+            Enabled         =   True
+            Height          =   30
+            HelpTag         =   ""
+            Index           =   -2147483648
+            InitialParent   =   "ImportSingleFileGroup"
+            Italic          =   False
+            Left            =   198
+            LockBottom      =   False
+            LockedInPosition=   False
+            LockLeft        =   True
+            LockRight       =   False
+            LockTop         =   True
+            Multiline       =   False
+            Scope           =   0
+            Selectable      =   False
+            TabIndex        =   9
+            TabPanelIndex   =   4
+            TabStop         =   True
+            Text            =   "Filename"
+            TextAlign       =   0
+            TextColor       =   &c00000000
+            TextFont        =   "System"
+            TextSize        =   16.0
+            TextUnit        =   0
+            Top             =   113
+            Transparent     =   True
+            Underline       =   False
+            Visible         =   True
+            Width           =   201
+         End
+         Begin Label SingleImportMetadataLabel
+            AutoDeactivate  =   True
+            Bold            =   False
+            DataField       =   ""
+            DataSource      =   ""
+            Enabled         =   True
+            Height          =   30
+            HelpTag         =   ""
+            Index           =   -2147483648
+            InitialParent   =   "ImportSingleFileGroup"
+            Italic          =   False
+            Left            =   411
+            LockBottom      =   False
+            LockedInPosition=   False
+            LockLeft        =   True
+            LockRight       =   False
+            LockTop         =   True
+            Multiline       =   False
+            Scope           =   0
+            Selectable      =   False
+            TabIndex        =   10
+            TabPanelIndex   =   4
+            TabStop         =   True
+            Text            =   "Metadata"
+            TextAlign       =   0
+            TextColor       =   &c00000000
+            TextFont        =   "System"
+            TextSize        =   16.0
+            TextUnit        =   0
+            Top             =   113
+            Transparent     =   True
+            Underline       =   False
+            Visible         =   True
+            Width           =   160
+         End
+         Begin Label SingleImportUUIDlabel
+            AutoDeactivate  =   True
+            Bold            =   False
+            DataField       =   ""
+            DataSource      =   ""
+            Enabled         =   True
+            Height          =   30
+            HelpTag         =   ""
+            Index           =   -2147483648
+            InitialParent   =   "ImportSingleFileGroup"
+            Italic          =   False
+            Left            =   583
+            LockBottom      =   False
+            LockedInPosition=   False
+            LockLeft        =   True
+            LockRight       =   True
+            LockTop         =   True
+            Multiline       =   False
+            Scope           =   0
+            Selectable      =   False
+            TabIndex        =   11
+            TabPanelIndex   =   4
+            TabStop         =   True
+            Text            =   "Assigned UUID (or error)"
+            TextAlign       =   0
+            TextColor       =   &c00000000
+            TextFont        =   "System"
+            TextSize        =   16.0
+            TextUnit        =   0
+            Top             =   113
+            Transparent     =   True
+            Underline       =   False
+            Visible         =   True
+            Width           =   337
+         End
+         Begin CheckBox ImportSingleCopyCheck
+            AutoDeactivate  =   True
+            Bold            =   False
+            Caption         =   "Copy UUID when done"
+            DataField       =   ""
+            DataSource      =   ""
+            Enabled         =   True
+            Height          =   20
+            HelpTag         =   ""
+            Index           =   -2147483648
+            InitialParent   =   "ImportSingleFileGroup"
+            Italic          =   False
+            Left            =   583
+            LockBottom      =   False
+            LockedInPosition=   False
+            LockLeft        =   True
+            LockRight       =   True
+            LockTop         =   True
+            Scope           =   0
+            State           =   1
+            TabIndex        =   12
+            TabPanelIndex   =   4
+            TabStop         =   True
+            TextFont        =   "System"
+            TextSize        =   16.0
+            TextUnit        =   0
+            Top             =   187
+            Transparent     =   False
+            Underline       =   False
+            Value           =   True
+            Visible         =   True
+            Width           =   337
+         End
+         Begin CheckBox SingleImportMetaIsFilenameCheck
+            AutoDeactivate  =   True
+            Bold            =   False
+            Caption         =   "Set to Filename"
+            DataField       =   ""
+            DataSource      =   ""
+            Enabled         =   True
+            Height          =   20
+            HelpTag         =   ""
+            Index           =   -2147483648
+            InitialParent   =   "ImportSingleFileGroup"
+            Italic          =   False
+            Left            =   411
+            LockBottom      =   False
+            LockedInPosition=   False
+            LockLeft        =   True
+            LockRight       =   False
+            LockTop         =   True
+            Scope           =   0
+            State           =   1
+            TabIndex        =   13
+            TabPanelIndex   =   4
+            TabStop         =   True
+            TextFont        =   "System"
+            TextSize        =   16.0
+            TextUnit        =   0
+            Top             =   187
+            Transparent     =   False
+            Underline       =   False
+            Value           =   True
+            Visible         =   True
+            Width           =   160
+         End
       End
    End
    Begin Timer RefreshTimer
@@ -1856,7 +2351,7 @@ Begin Window MainWindow
       Scope           =   0
       TabIndex        =   1
       TabPanelIndex   =   0
-      Top             =   501
+      Top             =   551
       Transparent     =   True
       Visible         =   True
       Width           =   20
@@ -1890,7 +2385,7 @@ Begin Window MainWindow
       TextFont        =   "System"
       TextSize        =   16.0
       TextUnit        =   0
-      Top             =   496
+      Top             =   546
       Transparent     =   False
       Underline       =   True
       Visible         =   True
@@ -1925,7 +2420,11 @@ End
 		  PoolList.DeleteAllRows
 		  PoolList.AddRow "<NEW>"
 		  
+		  MediaList.DeleteAllRows
+		  
 		  ClearPoolFields
+		  
+		  
 		End Sub
 	#tag EndMethod
 
@@ -2019,6 +2518,17 @@ End
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
+		Function isMediumListed(uuid as string) As integer
+		  for i as Integer = 0 to MediaList.ListCount - 1
+		    if MediaList.cell(i,2) = uuid then return i
+		  next i
+		  
+		  return -1
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Function isPoolListed(poolname as string) As integer
 		  for i as Integer = 1 to PoolList.ListCount - 1
 		    if PoolList.cell(i,0) = poolname then return i
@@ -2088,13 +2598,28 @@ End
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function refreshPoolList() As string
+		Sub RefreshStart()
+		  RefreshTimer.Mode = Timer.ModeMultiple
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub RefreshStop()
+		  RefreshTimer.Mode = Timer.ModeOff
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function refreshUI() As string
 		  dim pools(-1) as String = activeSession.getPoolNames
 		  dim pooldetails as  Limnie.Pool
 		  dim rowFound as Integer
 		  
 		  if activeSession.getLastError <> "" then Return "Error updating pool info data: " + activeSession.getLastError
 		  
+		  dim poolListed as Boolean
+		  
+		  dim media4pool(-1) as Limnie.Medium
 		  
 		  for i as Integer = 0 to pools.Ubound
 		    pooldetails = activeSession.getPoolDetails(pools(i) , true)
@@ -2110,22 +2635,23 @@ End
 		      PoolList.RowTag(rowFound) = pooldetails
 		    end if
 		    
+		    poolListed = false
+		    for j as Integer = 0 to SingleImport2PoolMenu.ListCount - 1
+		      if SingleImport2PoolMenu.List(j) = pools(i) then 
+		        poolListed = true
+		        exit for j
+		      end if
+		    next j
+		    if poolListed = False then SingleImport2PoolMenu.AddRow pools(i)
+		    
+		    
+		    media4pool = activeSession.getMediaDetails(MediaSurvey_WHERE + " AND " + FilterOpenClosedMediaMenu.RowTag(FilterOpenClosedMediaMenu.ListIndex) , " pool , idx ASC")
+		    
+		    
 		  next i
 		  
 		  Return ""
 		End Function
-	#tag EndMethod
-
-	#tag Method, Flags = &h0
-		Sub RefreshStart()
-		  RefreshTimer.Mode = Timer.ModeMultiple
-		End Sub
-	#tag EndMethod
-
-	#tag Method, Flags = &h0
-		Sub RefreshStop()
-		  RefreshTimer.Mode = Timer.ModeOff
-		End Sub
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
@@ -2149,6 +2675,13 @@ End
 		    showMediaBtn.Enabled = false
 		    updatePoolBtn.Enabled = false
 		    
+		    MediaList.Enabled = false
+		    ShowAllPoolMediaBtn.Enabled = false
+		    MarkAsClosedBtn.Enabled = False
+		    FilterOpenClosedMediaMenu.Enabled = False
+		    
+		    ImportSingleFileGroup.Enabled = False
+		    
 		  case UIstates.VFSopenIdle
 		    
 		    openVFSbtn.Enabled = False
@@ -2163,6 +2696,13 @@ End
 		    
 		    PoolList.ListIndex = 0
 		    
+		    MediaList.Enabled = true
+		    ShowAllPoolMediaBtn.Enabled = true
+		    MarkAsClosedBtn.Enabled = true
+		    FilterOpenClosedMediaMenu.Enabled = true
+		    
+		    ImportSingleFileGroup.Enabled = true
+		    
 		    RefreshStart
 		    
 		  end select
@@ -2174,6 +2714,10 @@ End
 
 	#tag Property, Flags = &h0
 		activeSession As Limnie.Session
+	#tag EndProperty
+
+	#tag Property, Flags = &h0
+		MediaSurvey_WHERE As string
 	#tag EndProperty
 
 
@@ -2385,6 +2929,17 @@ End
 #tag Events showMediaBtn
 	#tag Event
 		Sub Action()
+		  dim row as Integer = PoolList.ListIndex
+		  if row < 0 then return
+		  if PoolList.cell(row,0) = "<NEW>" then return
+		  
+		  MediaSurvey_WHERE = " pool = '" + PoolList.cell(row,0) + "' "
+		  
+		  RefreshStop
+		  MediaList.DeleteAllRows
+		  call refreshUI
+		  MainPanel.Value = 2
+		  RefreshStart
 		  
 		End Sub
 	#tag EndEvent
@@ -2404,13 +2959,14 @@ End
 		  end if
 		  
 		  RefreshStop
-		  dim createNext as Limnie.Medium = activeSession.createNextMedium(PoolList.cell(row,0) , false)  // we do not autoexpand
+		  
+		  dim createNext as Limnie.Medium = activeSession.createNextMedium(PoolList.cell(row,0) , false)  // we are obviously not auto-expanding the pool in this case
 		  
 		  if createNext.error then 
 		    MsgBox "Error creating next medium: " + createNext.errorMessage
 		  end if
 		  
-		  call refreshPoolList
+		  call refreshUI
 		  RefreshStart
 		  
 		End Sub
@@ -2419,6 +2975,71 @@ End
 #tag Events MediaList
 	#tag Event
 		Sub Open()
+		  me.ColumnCount = 7
+		  me.Heading(0) = "Pool"
+		  me.Heading(1) = "ID"
+		  me.Heading(2) = "UUID"
+		  me.Heading(3) = "Max Size (MB)"
+		  me.Heading(4) = "Utilization (%)"
+		  me.Heading(5) = "Mounted"
+		  me.Heading(6) = "Open"
+		  
+		  me.ColumnWidths = "15%,10%,25%,15%,15%,10%,10%"
+		  me.HasHeading = true
+		  me.ColumnsResizable = false
+		  me.HeaderType(-1) = Listbox.HeaderTypes.NotSortable
+		  me.RequiresSelection = true
+		  
+		  
+		  
+		  
+		End Sub
+	#tag EndEvent
+	#tag Event
+		Function CellBackgroundPaint(g As Graphics, row As Integer, column As Integer) As Boolean
+		  If row Mod 2 = 0 Then
+		    g.ForeColor= &cf7faff
+		  Else
+		    g.ForeColor= &cffffff
+		  End If
+		  g.FillRect(0, 0, g.Width, g.Height)
+		End Function
+	#tag EndEvent
+#tag EndEvents
+#tag Events FilterOpenClosedMediaMenu
+	#tag Event
+		Sub Open()
+		  me.AddRow "  All"
+		  me.RowTag(me.ListCount - 1) = " TRUE "
+		  
+		  me.AddRow "  Open"
+		  me.RowTag(me.ListCount - 1) = " open = 'TRUE' "
+		  
+		  me.AddRow "  Closed"
+		  me.RowTag(me.ListCount - 1) = " open = 'FALSE' "
+		  
+		  me.ListIndex = 0
+		  
+		End Sub
+	#tag EndEvent
+#tag EndEvents
+#tag Events SingleImportSourceFileField
+	#tag Event
+		Sub TextChange()
+		  if SingleImportMetaIsFilenameCheck.Value = true then SingleImportMetadataField.Text = me.Text
+		  
+		  
+		End Sub
+	#tag EndEvent
+#tag EndEvents
+#tag Events SingleImportMetaIsFilenameCheck
+	#tag Event
+		Sub Action()
+		  if me.Value = true then 
+		    SingleImportMetadataField.Text = SingleImportSourceFileField.Text
+		  else
+		    SingleImportMetadataField.Text = ""
+		  end if
 		  
 		End Sub
 	#tag EndEvent
@@ -2427,7 +3048,7 @@ End
 	#tag Event
 		Sub Action()
 		  
-		  dim refreshPoolsOK as String = refreshPoolList
+		  dim refreshPoolsOK as String = refreshUI
 		  
 		  if refreshPoolsOK <> "" then
 		    me.Mode = timer.ModeOff
