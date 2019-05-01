@@ -469,25 +469,40 @@ Protected Class Session
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function getDocumentDetails(poolname as string, id as string) As Limnie.Document
-		  //the id can either be the objidx of the document or its uuid, the method recognized it automatically
+		Function getDocumentDetails(poolname as string, id as string, optional IncludeDeleted as Boolean = False) As Limnie.Document
+		  //the id can either be the objidx of the document or its uuid, the method recognizes it automatically
+		  if isnull(activeVFS) = true then return new Limnie.Document("VFS database is no longer active")
 		  
-		  // 
-		  // if isnull(activeVFS) = true then return new pdstorage_document(CurrentMethodName + ": VFS database is no longer active")
-		  // 
-		  // dim rs as RecordSet = activeVFS.SQLSelect("SELECT * FROM " + poolname + " WHERE objidx = " + str(objidx))
-		  // if activeVFS.Error = true then return new pdstorage_document(CurrentMethodName + ": Error while searching for document ID: " + activeVFS.ErrorMessage)
-		  // if rs.RecordCount <> 1 then return new pdstorage_document(CurrentMethodName + ": Document ID " + str(objidx) + " does not exist in pool " + poolname)
-		  // 
-		  // if rs.Field("firstpart").IntegerValue <> 0 and rs.field("firstpart").IntegerValue <> objidx then
-		  // return new pdstorage_document(CurrentMethodName + ": ID " + str(objidx) + " is an intermediate fragment of document " + rs.Field("firstpart").StringValue)
-		  // end if
-		  // 
-		  // dim output as new pdstorage_document
-		  // dim fragment as pdstorage_fragment
-		  // dim medium as pdstorage_medium
-		  // dim mediumInfo as new pdstorage_medium
-		  // 
+		  dim isUUID as Boolean
+		  if IsNumeric(id) then isUUID = false else isUUID = true  // and if it's not a uuid then it's an objidx
+		  
+		  dim rs as RecordSet
+		  dim query as String = "SELECT * FROM '" + poolname + "' WHERE "
+		  
+		  if isUUID then
+		    query = query + "uuid = '" + id + "'"
+		  else
+		    query = query + "objidx = " + id
+		  end if
+		  
+		  if IncludeDeleted then query = query + " AND deleted = 'true'"
+		  query = query + " ORDER BY objidx ASC LIMIT 1"
+		  
+		  if activeVFS.Error then return new Limnie.Document("Error querying pool " + poolname + " for document ID " + id + " : " + activeVFS.ErrorMessage)
+		  if rs.RecordCount = 0 then return new Limnie.Document("Document ID " + id + " does not exist in pool " + poolname)
+		  
+		  if isUUID = false then
+		    if rs.Field("firstpart").IntegerValue <> 0 and rs.field("firstpart").StringValue <> id then
+		      return new Limnie.Document("ID " + id + " is an intermediate fragment of document " + rs.Field("firstpart").StringValue + ". You normally should not know this value, check your application database consistency!")
+		    end if
+		  end if
+		  
+		  
+		  dim output as new Limnie.Document
+		  dim fragment as Limnie.Fragment
+		  //dim medium as Limnie.Medium
+		  dim mediumInfo as new Limnie.Medium
+		  
 		  // output.objidx = rs.Field("objidx").Int64Value
 		  // output.metadatum = rs.Field("metadatum").StringValue
 		  // output.creationStamp = rs.Field("creationstamp").DateValue

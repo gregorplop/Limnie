@@ -86,7 +86,7 @@ Begin Window InputWindow
       LockRight       =   False
       LockTop         =   True
       Mask            =   ""
-      Password        =   False
+      Password        =   True
       ReadOnly        =   False
       Scope           =   0
       TabIndex        =   1

@@ -345,7 +345,7 @@ Protected Module Limnie
 	#tag Constant, Name = fragmentSize, Type = Double, Dynamic = False, Default = \"8", Scope = Public
 	#tag EndConstant
 
-	#tag Constant, Name = LimnieVersion, Type = Double, Dynamic = False, Default = \"0.1", Scope = Public
+	#tag Constant, Name = LimnieVersion, Type = Double, Dynamic = False, Default = \"0.5", Scope = Public
 	#tag EndConstant
 
 	#tag Constant, Name = MByte, Type = Double, Dynamic = False, Default = \"1048576", Scope = Private

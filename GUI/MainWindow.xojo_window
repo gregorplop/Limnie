@@ -54,7 +54,7 @@ Begin Window MainWindow
       Top             =   20
       Transparent     =   False
       Underline       =   False
-      Value           =   2
+      Value           =   4
       Visible         =   True
       Width           =   940
       Begin PushButton CreateVFSbtn
@@ -2043,7 +2043,7 @@ Begin Window MainWindow
             Visible         =   True
             Width           =   160
          End
-         Begin PushButton ImportSingleFileBtn
+         Begin PushButton SingleImportDoitBtn
             AutoDeactivate  =   True
             Bold            =   False
             ButtonStyle     =   "0"
@@ -2224,7 +2224,7 @@ Begin Window MainWindow
             Visible         =   True
             Width           =   337
          End
-         Begin CheckBox ImportSingleCopyCheck
+         Begin CheckBox SingleImportCopyCheck
             AutoDeactivate  =   True
             Bold            =   False
             Caption         =   "Copy UUID when done"
@@ -2290,6 +2290,38 @@ Begin Window MainWindow
             Visible         =   True
             Width           =   160
          End
+         Begin PushButton SingleImportClearBtn
+            AutoDeactivate  =   True
+            Bold            =   False
+            ButtonStyle     =   "0"
+            Cancel          =   False
+            Caption         =   "Clear"
+            Default         =   False
+            Enabled         =   True
+            Height          =   25
+            HelpTag         =   ""
+            Index           =   -2147483648
+            InitialParent   =   "ImportSingleFileGroup"
+            Italic          =   False
+            Left            =   198
+            LockBottom      =   False
+            LockedInPosition=   False
+            LockLeft        =   True
+            LockRight       =   False
+            LockTop         =   True
+            Scope           =   0
+            TabIndex        =   14
+            TabPanelIndex   =   4
+            TabStop         =   True
+            TextFont        =   "System"
+            TextSize        =   14.0
+            TextUnit        =   0
+            Top             =   185
+            Transparent     =   False
+            Underline       =   False
+            Visible         =   True
+            Width           =   73
+         End
       End
       Begin PushButton ClearPasswordCacheBtn
          AutoDeactivate  =   True
@@ -2322,6 +2354,357 @@ Begin Window MainWindow
          Underline       =   False
          Visible         =   True
          Width           =   150
+      End
+      Begin GroupBox ExportSingleObjectGroup
+         AutoDeactivate  =   True
+         Bold            =   False
+         Caption         =   "Export Single Object (non-threaded)"
+         Enabled         =   True
+         Height          =   151
+         HelpTag         =   ""
+         Index           =   -2147483648
+         InitialParent   =   "MainPanel"
+         Italic          =   False
+         Left            =   40
+         LockBottom      =   False
+         LockedInPosition=   False
+         LockLeft        =   True
+         LockRight       =   True
+         LockTop         =   True
+         Scope           =   0
+         TabIndex        =   0
+         TabPanelIndex   =   5
+         TabStop         =   True
+         TextFont        =   "System"
+         TextSize        =   16.0
+         TextUnit        =   0
+         Top             =   77
+         Transparent     =   False
+         Underline       =   False
+         Visible         =   True
+         Width           =   900
+         Begin Label SingleExportFromPoolLabel
+            AutoDeactivate  =   True
+            Bold            =   False
+            DataField       =   ""
+            DataSource      =   ""
+            Enabled         =   True
+            Height          =   30
+            HelpTag         =   ""
+            Index           =   -2147483648
+            InitialParent   =   "ExportSingleObjectGroup"
+            Italic          =   False
+            Left            =   60
+            LockBottom      =   False
+            LockedInPosition=   False
+            LockLeft        =   True
+            LockRight       =   False
+            LockTop         =   True
+            Multiline       =   False
+            Scope           =   0
+            Selectable      =   False
+            TabIndex        =   0
+            TabPanelIndex   =   5
+            TabStop         =   True
+            Text            =   "Pool"
+            TextAlign       =   0
+            TextColor       =   &c00000000
+            TextFont        =   "System"
+            TextSize        =   16.0
+            TextUnit        =   0
+            Top             =   113
+            Transparent     =   True
+            Underline       =   False
+            Visible         =   True
+            Width           =   126
+         End
+         Begin PopupMenu SingleExportFromPoolMenu
+            AutoDeactivate  =   True
+            Bold            =   False
+            DataField       =   ""
+            DataSource      =   ""
+            Enabled         =   True
+            Height          =   30
+            HelpTag         =   ""
+            Index           =   -2147483648
+            InitialParent   =   "ExportSingleObjectGroup"
+            InitialValue    =   ""
+            Italic          =   False
+            Left            =   60
+            ListIndex       =   0
+            LockBottom      =   False
+            LockedInPosition=   False
+            LockLeft        =   True
+            LockRight       =   False
+            LockTop         =   True
+            Scope           =   0
+            TabIndex        =   1
+            TabPanelIndex   =   5
+            TabStop         =   True
+            TextFont        =   "System"
+            TextSize        =   16.0
+            TextUnit        =   0
+            Top             =   145
+            Transparent     =   False
+            Underline       =   False
+            Visible         =   True
+            Width           =   126
+         End
+         Begin TextField SingleExportSourceUUIDfield
+            AcceptTabs      =   False
+            Alignment       =   0
+            AutoDeactivate  =   True
+            AutomaticallyCheckSpelling=   False
+            BackColor       =   &cFFFFFF00
+            Bold            =   False
+            Border          =   True
+            CueText         =   ""
+            DataField       =   ""
+            DataSource      =   ""
+            Enabled         =   True
+            Format          =   ""
+            Height          =   30
+            HelpTag         =   ""
+            Index           =   -2147483648
+            InitialParent   =   "ExportSingleObjectGroup"
+            Italic          =   False
+            Left            =   198
+            LimitText       =   0
+            LockBottom      =   False
+            LockedInPosition=   False
+            LockLeft        =   True
+            LockRight       =   False
+            LockTop         =   True
+            Mask            =   ""
+            Password        =   False
+            ReadOnly        =   False
+            Scope           =   0
+            TabIndex        =   2
+            TabPanelIndex   =   5
+            TabStop         =   True
+            Text            =   ""
+            TextColor       =   &c00000000
+            TextFont        =   "System"
+            TextSize        =   16.0
+            TextUnit        =   0
+            Top             =   145
+            Transparent     =   False
+            Underline       =   False
+            UseFocusRing    =   True
+            Visible         =   True
+            Width           =   201
+         End
+         Begin PushButton SingleExportDoItBtn
+            AutoDeactivate  =   True
+            Bold            =   False
+            ButtonStyle     =   "0"
+            Cancel          =   False
+            Caption         =   "Export"
+            Default         =   False
+            Enabled         =   True
+            Height          =   30
+            HelpTag         =   ""
+            Index           =   -2147483648
+            InitialParent   =   "ExportSingleObjectGroup"
+            Italic          =   False
+            Left            =   784
+            LockBottom      =   False
+            LockedInPosition=   False
+            LockLeft        =   False
+            LockRight       =   True
+            LockTop         =   True
+            Scope           =   0
+            TabIndex        =   4
+            TabPanelIndex   =   5
+            TabStop         =   True
+            TextFont        =   "System"
+            TextSize        =   14.0
+            TextUnit        =   0
+            Top             =   145
+            Transparent     =   False
+            Underline       =   False
+            Visible         =   True
+            Width           =   136
+         End
+         Begin TextField SingleExportTargetFilenameField
+            AcceptTabs      =   False
+            Alignment       =   0
+            AutoDeactivate  =   True
+            AutomaticallyCheckSpelling=   False
+            BackColor       =   &cFFFF8000
+            Bold            =   False
+            Border          =   True
+            CueText         =   ""
+            DataField       =   ""
+            DataSource      =   ""
+            Enabled         =   True
+            Format          =   ""
+            Height          =   30
+            HelpTag         =   ""
+            Index           =   -2147483648
+            InitialParent   =   "ExportSingleObjectGroup"
+            Italic          =   False
+            Left            =   411
+            LimitText       =   0
+            LockBottom      =   False
+            LockedInPosition=   False
+            LockLeft        =   True
+            LockRight       =   True
+            LockTop         =   True
+            Mask            =   ""
+            Password        =   False
+            ReadOnly        =   False
+            Scope           =   0
+            TabIndex        =   5
+            TabPanelIndex   =   5
+            TabStop         =   True
+            Text            =   ""
+            TextColor       =   &c00000000
+            TextFont        =   "System"
+            TextSize        =   16.0
+            TextUnit        =   0
+            Top             =   145
+            Transparent     =   True
+            Underline       =   False
+            UseFocusRing    =   True
+            Visible         =   True
+            Width           =   361
+         End
+         Begin Label SingleExportSourceUUIDlabel
+            AutoDeactivate  =   True
+            Bold            =   False
+            DataField       =   ""
+            DataSource      =   ""
+            Enabled         =   True
+            Height          =   30
+            HelpTag         =   ""
+            Index           =   -2147483648
+            InitialParent   =   "ExportSingleObjectGroup"
+            Italic          =   False
+            Left            =   198
+            LockBottom      =   False
+            LockedInPosition=   False
+            LockLeft        =   True
+            LockRight       =   False
+            LockTop         =   True
+            Multiline       =   False
+            Scope           =   0
+            Selectable      =   False
+            TabIndex        =   6
+            TabPanelIndex   =   5
+            TabStop         =   True
+            Text            =   "Object UUID"
+            TextAlign       =   0
+            TextColor       =   &c00000000
+            TextFont        =   "System"
+            TextSize        =   16.0
+            TextUnit        =   0
+            Top             =   113
+            Transparent     =   True
+            Underline       =   False
+            Visible         =   True
+            Width           =   201
+         End
+         Begin Label SingleExportTargetFilenameLabel
+            AutoDeactivate  =   True
+            Bold            =   False
+            DataField       =   ""
+            DataSource      =   ""
+            Enabled         =   True
+            Height          =   30
+            HelpTag         =   ""
+            Index           =   -2147483648
+            InitialParent   =   "ExportSingleObjectGroup"
+            Italic          =   False
+            Left            =   411
+            LockBottom      =   False
+            LockedInPosition=   False
+            LockLeft        =   True
+            LockRight       =   True
+            LockTop         =   True
+            Multiline       =   False
+            Scope           =   0
+            Selectable      =   False
+            TabIndex        =   8
+            TabPanelIndex   =   5
+            TabStop         =   True
+            Text            =   "Target folder/filename (or error)"
+            TextAlign       =   0
+            TextColor       =   &c00000000
+            TextFont        =   "System"
+            TextSize        =   16.0
+            TextUnit        =   0
+            Top             =   113
+            Transparent     =   True
+            Underline       =   False
+            Visible         =   True
+            Width           =   509
+         End
+         Begin CheckBox SingleExportMetadatumIsFilenameCheck
+            AutoDeactivate  =   True
+            Bold            =   False
+            Caption         =   "Name file after object metadata value"
+            DataField       =   ""
+            DataSource      =   ""
+            Enabled         =   True
+            Height          =   20
+            HelpTag         =   ""
+            Index           =   -2147483648
+            InitialParent   =   "ExportSingleObjectGroup"
+            Italic          =   False
+            Left            =   411
+            LockBottom      =   False
+            LockedInPosition=   False
+            LockLeft        =   True
+            LockRight       =   True
+            LockTop         =   True
+            Scope           =   0
+            State           =   1
+            TabIndex        =   10
+            TabPanelIndex   =   5
+            TabStop         =   True
+            TextFont        =   "System"
+            TextSize        =   16.0
+            TextUnit        =   0
+            Top             =   187
+            Transparent     =   False
+            Underline       =   False
+            Value           =   True
+            Visible         =   True
+            Width           =   361
+         End
+         Begin PushButton SingleImportClearBtn1
+            AutoDeactivate  =   True
+            Bold            =   False
+            ButtonStyle     =   "0"
+            Cancel          =   False
+            Caption         =   "Clear"
+            Default         =   False
+            Enabled         =   True
+            Height          =   25
+            HelpTag         =   ""
+            Index           =   -2147483648
+            InitialParent   =   "ExportSingleObjectGroup"
+            Italic          =   False
+            Left            =   198
+            LockBottom      =   False
+            LockedInPosition=   False
+            LockLeft        =   True
+            LockRight       =   False
+            LockTop         =   True
+            Scope           =   0
+            TabIndex        =   11
+            TabPanelIndex   =   5
+            TabStop         =   True
+            TextFont        =   "System"
+            TextSize        =   14.0
+            TextUnit        =   0
+            Top             =   185
+            Transparent     =   False
+            Underline       =   False
+            Visible         =   True
+            Width           =   73
+         End
       End
    End
    Begin Timer RefreshTimer
@@ -2642,8 +3025,10 @@ End
 		        exit for j
 		      end if
 		    next j
-		    if poolListed = False then SingleImport2PoolMenu.AddRow pools(i)
-		    
+		    if poolListed = False then 
+		      SingleImport2PoolMenu.AddRow pools(i)
+		      SingleExportFromPoolMenu.AddRow pools(i)
+		    end if
 		    
 		    WHERE = MediaSurvey_WHERE + " AND " + FilterOpenClosedMediaMenu.RowTag(FilterOpenClosedMediaMenu.ListIndex).StringValue
 		    System.DebugLog(WHERE)
@@ -2698,6 +3083,7 @@ End
 		    FilterOpenClosedMediaMenu.Enabled = False
 		    
 		    ImportSingleFileGroup.Enabled = False
+		    ExportSingleObjectGroup.Enabled = false
 		    
 		  case UIstates.VFSopenIdle
 		    
@@ -2718,6 +3104,7 @@ End
 		    FilterOpenClosedMediaMenu.Enabled = true
 		    
 		    ImportSingleFileGroup.Enabled = true
+		    ExportSingleObjectGroup.Enabled = true
 		    
 		    MediaSurvey_WHERE = " TRUE "
 		    
@@ -2731,15 +3118,41 @@ End
 
 	#tag Method, Flags = &h0
 		Function SingleImport() As Boolean
+		  if SingleImport2PoolMenu.Text = "" then
+		    MsgBox "No target pool selected!"
+		    return false
+		  end if
+		  if SingleImportSourceFileField.Text.Trim = "" then
+		    MsgBox "No source file selected!"
+		    return False
+		  end if
 		  
-		  dim file as BinaryStream = BinaryStream.Open(GetFolderItem("D:\Software\Windows\Xojo\Xojo2015r24Setup.exe") , False)
+		  dim sourceFile as FolderItem = GetFolderItem(SingleImportSourceFileField.Text.Trim)
 		  
-		  dim newDocument as Limnie.Document = activeSession.createDocument(file , "second" , "testmetadatum" , true)
+		  if IsNull(sourceFile) then 
+		    MsgBox "Source file path is invalid!"
+		    return False
+		  end if
+		  if sourceFile.Exists = false then
+		    MsgBox "Source file does not exist!"
+		    return false
+		  end if
+		  
+		  dim sourceStream as BinaryStream = BinaryStream.Open(sourceFile , False)
+		  dim newDocument as Limnie.Document = activeSession.createDocument(sourceStream , SingleImport2PoolMenu.Text , SingleImportMetadataField.Text , false)
+		  
+		  sourceStream.Close
 		  
 		  if newDocument.error = true then
-		    MsgBox newDocument.errorMessage
+		    SingleImportUUIDfield.Text = newDocument.errorMessage
 		  else
-		    MsgBox "OK"
+		    SingleImportUUIDfield.Text = newDocument.uuid
+		  end if
+		  
+		  if SingleImportCopyCheck.Value = true then
+		    dim c as new Clipboard
+		    c.SetText(SingleImportUUIDfield.Text)
+		    c.Close
 		  end if
 		  
 		  
@@ -3075,13 +3488,30 @@ End
 #tag Events SingleImportSourceFileField
 	#tag Event
 		Sub TextChange()
-		  if SingleImportMetaIsFilenameCheck.Value = true then SingleImportMetadataField.Text = me.Text
+		  dim folderDelimiter as String
 		  
+		  #if TargetWindows then
+		    folderDelimiter = "\"
+		  #Else
+		    folderDelimiter = "/"
+		  #Endif
 		  
+		  if SingleImportMetaIsFilenameCheck.Value = true then
+		     SingleImportMetadataField.Text = me.Text.NthField(folderDelimiter , me.Text.CountFields(folderDelimiter))
+		  end if
 		End Sub
 	#tag EndEvent
+	#tag Event
+		Function ConstructContextualMenu(base as MenuItem, x as Integer, y as Integer) As Boolean
+		  dim file as FolderItem = GetOpenFolderItem("")
+		  if file = nil then Return true
+		  me.Text = file.NativePath
+		  return true
+		  
+		End Function
+	#tag EndEvent
 #tag EndEvents
-#tag Events ImportSingleFileBtn
+#tag Events SingleImportDoitBtn
 	#tag Event
 		Sub Action()
 		  call SingleImport
@@ -3100,10 +3530,51 @@ End
 		End Sub
 	#tag EndEvent
 #tag EndEvents
+#tag Events SingleImportClearBtn
+	#tag Event
+		Sub Action()
+		  SingleImportSourceFileField.Text = ""
+		  SingleImportMetadataField.Text = ""
+		  SingleImportUUIDfield.Text = ""
+		  
+		End Sub
+	#tag EndEvent
+#tag EndEvents
 #tag Events ClearPasswordCacheBtn
 	#tag Event
 		Sub Action()
 		  if IsNull(activeSession) = false then activeSession.clearPoolPasswordCache
+		  
+		End Sub
+	#tag EndEvent
+#tag EndEvents
+#tag Events SingleExportSourceUUIDfield
+#tag EndEvents
+#tag Events SingleExportDoItBtn
+	#tag Event
+		Sub Action()
+		  
+		End Sub
+	#tag EndEvent
+#tag EndEvents
+#tag Events SingleExportMetadatumIsFilenameCheck
+	#tag Event
+		Sub Action()
+		  if me.Value = true then 
+		    SingleImportMetadataField.Text = SingleImportSourceFileField.Text
+		  else
+		    SingleImportMetadataField.Text = ""
+		  end if
+		  
+		End Sub
+	#tag EndEvent
+#tag EndEvents
+#tag Events SingleImportClearBtn1
+	#tag Event
+		Sub Action()
+		  SingleExportSourceUUIDfield.Text = ""
+		  
+		  if SingleExportMetadatumIsFilenameCheck.Value = False then SingleExportTargetFilenameField.Text = ""
 		  
 		End Sub
 	#tag EndEvent

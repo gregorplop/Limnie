@@ -11,7 +11,6 @@ Class=Pool;../Limnie/Pool.xojo_code;&h00000000267357FF;&h000000006F20D7FF;false
 Class=Medium;../Limnie/Medium.xojo_code;&h0000000052CCE7FF;&h000000006F20D7FF;false
 Class=Document;../Limnie/Document.xojo_code;&h0000000031D02FFF;&h000000006F20D7FF;false
 Class=Fragment;../Limnie/Fragment.xojo_code;&h00000000202B6FFF;&h000000006F20D7FF;false
-Class=stdOutcome;../Limnie/stdOutcome.xojo_code;&h000000005041A7FF;&h000000006F20D7FF;false
 Class=Session;../Limnie/Session.xojo_code;&h000000001CA987FF;&h000000006F20D7FF;false
 MajorVersion=1
 MinorVersion=0
