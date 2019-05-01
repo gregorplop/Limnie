@@ -3,6 +3,7 @@ Protected Class Session
 	#tag Method, Flags = &h0
 		Sub clearPoolPasswordCache()
 		  poolPasswords = new Dictionary
+		  Redim encryptedPoolsVerified(-1)
 		  
 		End Sub
 	#tag EndMethod
@@ -153,79 +154,90 @@ Protected Class Session
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function createDocument(source as Readable, poolname as string, metadata as String, optional yielding as Boolean = false) As Limnie.Document
+		Function createDocument(source as Readable, poolname as string, metadatum as String, optional yielding as Boolean = false) As Limnie.Document
 		  if IsNull(source) then return new Limnie.Document("New document source is invalid!")
 		  dim poolDetails as Limnie.Pool = getPoolDetails(poolname)
 		  if poolDetails.error then return new Limnie.Document("New document pool could not be opened: " + poolDetails.errorMessage)
 		  
-		  
-		  
-		  // we now have the password to open media of this pool (if we need it)
-		  
-		  
-		  dim Media(-1) as Limnie.Medium
+		  dim Media(-1) as Limnie.Medium  
 		  dim newDocument as new Limnie.Document // log of new records in pool & medium tables for the case of failure and rollback
 		  dim newFragment as Limnie.Fragment // log of new records in pool & medium tables for the case of failure and rollback
 		  dim fragmentData as string
+		  dim mediumPickTimeout as integer
 		  dim PickedMedium as integer
+		  dim setActiveMediumOK as Limnie.Medium
 		  dim md5calculator as new MD5Digest
+		  dim uuid as String = generateUUID
 		  dim firstObjidx as Int64 = -1
 		  dim newlyCreatedObjidx as int64
 		  dim newPoolCatalogueRecord as DatabaseRecord
 		  dim newMediumRecord as DatabaseRecord
-		  dim trimmedMetadatum as string = metadatum.Trim
 		  dim creationDate as new date
 		  dim finalHash as string = "pending"
-		  dim rollbackNewDocumentOutcome as pdOutcome  //
 		  dim objidxs(-1) as string
-		  dim createMediumOutcome as Limnie.Medium
-		  dim mediumPickTimeout as integer
+		  dim totalDocumentSize as Int64 = 0
+		  
+		  if uuid = empty then Return new Limnie.Document("Error creating document: Could not generate UUID")
 		  
 		  newDocument.pool = poolname
+		  newDocument.uuid = uuid
 		  
-		  
-		  do until source.EOF
-		    
+		   do until source.EOF
+		     
 		    fragmentData = source.Read(fragmentSize * MByte)  // get a fragment
 		    
-		    if source.ReadError then MsgBox "we need to handle this"  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		    if source.ReadError then  // crap, we have to rollback
+		      dim rollbackOK as String = rollbackPushData(newDocument)
+		      Return new Limnie.Document("Read error while creating new document: Attempted Rollback: " + if(rollbackOK = empty , "OK" , rollbackOK))
+		    end if
+		    
+		    if yielding then app.YieldToNextThread  // =============try to make things more smooth in desktop apps, not sure if it's going to work :p =====================
 		    
 		    // we need to decide which medium to write it to
-		    mediumPickTimeout = 0
+		    mediumPickTimeout = 10  // try this number of times
 		    do
-		      Media = getMediaDetails("pool = '" + poolname + "' AND open = 'true'" , "idx ASC")
+		      Media = getMediaDetails("pool = '" + poolname + "' AND open = 'true'" , "idx ASC")  // get all open media for pool
+		       if Media.Ubound = 0 and Media(0).errorCode = -1 then   // getMediaDetails failed
+		        dim rollbackOK as String = rollbackPushData(newDocument)
+		        Return new Limnie.Document("Media survey error while creating new document: " + Media(0).errorMessage + " : Attempted Rollback: " + if(rollbackOK = empty , "OK" , rollbackOK))
+		       end if
 		      
-		      
-		      if Media.Ubound < 0 then   // getMediaDetails failed
-		        rollbackNewDocumentOutcome = rollbackPushData(newDocument)
-		        return new pdOutcome(CurrentMethodName + ": Failed to get media info: " + ErrorMsg +" : Rollback outcome: " + if(rollbackNewDocumentOutcome.ok = true , "DONE" , rollbackNewDocumentOutcome.fatalErrorMsg))
-		      end if
-		      PickedMedium = pickSuitableMedium(Media , fragmentData.LenB) // pick a medium 
+		      PickedMedium = pickSuitableMedium(Media , fragmentData.LenB) // try to pick a medium 
 		      
 		      if PickedMedium = -1 then 
-		        createMediumOutcome = createNextMedium(poolname)
+		        dim createNextMediumOK as Limnie.Medium = createNextMedium(poolname , true)  // this is pool auto-expansion
 		        
-		        select case createMediumOutcome.fatalErrorCode
+		        select case createNextMediumOK.errorCode
 		        case 1  // infrastructure error
-		          rollbackNewDocumentOutcome = rollbackPushData(newDocument)
-		          return new pdOutcome(CurrentMethodName + ": Failed to create new medium (" + createMediumOutcome.fatalErrorMsg + "): Rollback outcome: " + if(rollbackNewDocumentOutcome.ok = true , "DONE" , rollbackNewDocumentOutcome.fatalErrorMsg))
-		        case 2  // maintenance lock on this pool
-		          app.SleepCurrentThread(2000)
-		          mediumPickTimeout = mediumPickTimeout + 1
+		          dim rollbackOK as String = rollbackPushData(newDocument)
+		          Return new Limnie.Document("Could not auto-expand pool: " + createNextMediumOK.errorMessage + " : Attempted Rollback: " + if(rollbackOK = empty , "OK" , rollbackOK))
+		        case 2  // maintenance lock on this pool, something's cooking, wait a bit...
+		          #if TargetConsole or TargetWeb then
+		            dim startMoment as Integer = date(new date).TotalSeconds
+		            while date(new date).TotalSeconds - startMoment < 2
+		              app.DoEvents  // it might me a server app with everything running on the main thread; be polite and don't block other people's events
+		            wend
+		          #Elseif TargetDesktop
+		            if yielding then app.YieldToNextThread  // =============try to make things more smooth in desktop apps, not sure if it's going to work :p =====================
+		            app.SleepCurrentThread(2000)  // we can't use doevents here, just sleep it off
+		          #endif
+		          mediumPickTimeout = mediumPickTimeout - 1
 		        end select
 		        
-		        if mediumPickTimeout = 10 then
-		          rollbackNewDocumentOutcome = rollbackPushData(newDocument)
-		          return new pdOutcome(CurrentMethodName + ": Timeout while retrying to create new medium (" + createMediumOutcome.fatalErrorMsg + "): Rollback outcome: " + if(rollbackNewDocumentOutcome.ok = true , "DONE" , rollbackNewDocumentOutcome.fatalErrorMsg))
+		        if mediumPickTimeout = 0 then  // we've waited more than enough for a new medium to be created, something has gone wrong, abort
+		          dim rollbackOK as String = rollbackPushData(newDocument)
+		          Return new Limnie.Document("Timeout while waiting for pool to auto-expand: Rollback: " + if(rollbackOK = empty , "OK" , rollbackOK))
 		        end if
 		      end if
 		    loop until PickedMedium > 0
 		    
-		    
-		    if setActiveMedium(poolname , PickedMedium) = false then  // failed to change medium
-		      rollbackNewDocumentOutcome = rollbackPushData(newDocument)
-		      return new pdOutcome(CurrentMethodName + ": Failed to open medium: " + poolname + str(PickedMedium) + " : Rollback outcome: " + if(rollbackNewDocumentOutcome.ok = true , "DONE" , rollbackNewDocumentOutcome.fatalErrorMsg))
+		    setActiveMediumOK = setActiveMedium(poolname , PickedMedium)
+		    if setActiveMediumOK.error = true then
+		      dim rollbackOK as String = rollbackPushData(newDocument)
+		      Return new Limnie.Document("Error opening medium " + str(PickedMedium) + " : " + setActiveMediumOK.errorMessage + " : Attempted Rollback: " + if(rollbackOK = empty , "OK" , rollbackOK))
 		    end if
+		    
+		    if yielding then app.YieldToNextThread  // =============try to make things more smooth in desktop apps, not sure if it's going to work :p ====================
 		    
 		    md5calculator.Process(fragmentData)
 		    
@@ -236,47 +248,62 @@ Protected Class Session
 		    newPoolCatalogueRecord.DateColumn("lastchange") = creationDate
 		    newPoolCatalogueRecord.BooleanColumn("deleted") = false
 		    newPoolCatalogueRecord.BooleanColumn("locked") = true
-		    if trimmedMetadatum <> empty then newPoolCatalogueRecord.Column("metadatum") = trimmedMetadatum
+		    newPoolCatalogueRecord.Column("uuid") = uuid
+		    if  metadatum.Trim <> empty then newPoolCatalogueRecord.Column("metadatum") = metadatum.Trim
 		    
-		    if firstObjidx = -1 and readStream.EOF = true then firstObjidx = 0  // this is the first and only fragment
-		    if readStream.EOF = true then finalHash = EncodeHex(md5calculator.Value)  // this is the final fragment
+		    if firstObjidx = -1 and source.EOF = true then firstObjidx = 0  // this is the first and only fragment
+		    if source.EOF = true then 
+		      finalHash = EncodeHex(md5calculator.Value)  // this is the final fragment
+		      newDocument.hash = finalHash
+		    end if
 		    
 		    newPoolCatalogueRecord.Int64Column("firstpart") = firstObjidx
 		    newPoolCatalogueRecord.Column("hash") = finalHash
 		    
 		    activeVFS.InsertRecord(poolname , newPoolCatalogueRecord)  // create the record in the pool catalogue
 		    if activeVFS.Error = true then 
-		      rollbackNewDocumentOutcome = rollbackPushData(newDocument)
-		      return new pdOutcome(CurrentMethodName + ":  Error creating pool table record: " + activeVFS.ErrorMessage + "  : Rollback outcome: " + if(rollbackNewDocumentOutcome.ok = true , "DONE" , rollbackNewDocumentOutcome.fatalErrorMsg))
+		      dim rollbackOK as String = rollbackPushData(newDocument)
+		      Return new Limnie.Document("Database error while creating pool catalogue records: " + activeVFS.ErrorMessage + " : Attempted Rollback: " + if(rollbackOK = empty , "OK" , rollbackOK))
 		    end if
 		    
 		    newlyCreatedObjidx = activeVFS.LastRowID
 		    
-		    newFragment = new pdstorage_fragment
+		    newFragment = new Limnie.Fragment
 		    newFragment.objidx = newlyCreatedObjidx  // necessary for rollback
 		    newFragment.mediumidx = PickedMedium     // necessary for rollback
+		    newFragment.mediumFile = activeMedium.DatabaseFile  // only because setActiveMedium has preceeded this
+		    newFragment.size = fragmentData.LenB
+		    newFragment.locked = true
 		    newDocument.fragments.Append newFragment
+		    
+		    // some other Document-wide properties that are clear at this point
+		    newDocument.creationStamp = creationDate
+		    newDocument.lastChangeStamp = creationDate
+		    newDocument.metadatum = metadatum.Trim
+		    
 		    
 		    if firstObjidx = -1 then   // first part of a fragmented document has just been stored - it's missing the correct firstpart field value
 		      newDocument.fragmented = true
 		      firstObjidx = newlyCreatedObjidx
 		      activeVFS.SQLExecute("UPDATE " + poolname + " SET firstpart = " + str(firstObjidx) + " WHERE objidx = " + str(firstObjidx))  // update the firstpart field of the first record of a fragmented document
-		      if activeVFS.Error = true then  // 
-		        rollbackNewDocumentOutcome = rollbackPushData(newDocument)
-		        return new pdOutcome(CurrentMethodName + ":  Error updating first fragment record: " + activeVFS.ErrorMessage + "  : Rollback outcome: " + if(rollbackNewDocumentOutcome.ok = true , "DONE" , rollbackNewDocumentOutcome.fatalErrorMsg))
+		      if activeVFS.Error = true then 
+		        dim rollbackOK as String = rollbackPushData(newDocument)
+		        Return new Limnie.Document("Database error while updating pool catalogue records: " + activeVFS.ErrorMessage + " : Attempted Rollback: " + if(rollbackOK = empty , "OK" , rollbackOK))
 		      end if
 		    end if
 		    
-		    if firstObjidx > 0 and readStream.EOF = true then  // the last part of a fragmented document, all past records are missing the correct hash
+		    
+		    if firstObjidx > 0 and source.EOF = true then  // the last part of a fragmented document, all past records are missing the correct hash
 		      activeVFS.SQLExecute("UPDATE " + poolname + " SET hash = '" + finalHash + "' WHERE firstpart = " + str(firstObjidx))
-		      if activeVFS.Error = true then  // 
-		        rollbackNewDocumentOutcome = rollbackPushData(newDocument)
-		        return new pdOutcome(CurrentMethodName + ":  Error updating document hash: " + activeVFS.ErrorMessage + "  : Rollback outcome: " + if(rollbackNewDocumentOutcome.ok = true , "DONE" , rollbackNewDocumentOutcome.fatalErrorMsg))
+		      if activeVFS.Error = true then
+		        dim rollbackOK as String = rollbackPushData(newDocument)
+		        Return new Limnie.Document("Error updating fragmented document hash: " + activeVFS.ErrorMessage + " : Attempted Rollback: " + if(rollbackOK = empty , "OK" , rollbackOK))
 		      end if
 		    end if
 		    
 		    // at this point we have created/updated entries in the pool master table
 		    // we are ready to write content into the selected medium
+		    if yielding then app.YieldToNextThread  // =============try to make things more smooth in desktop apps, not sure if it's going to work :p ====================
 		    
 		    newMediumRecord = new DatabaseRecord
 		    newMediumRecord.Int64Column("objidx") = newlyCreatedObjidx
@@ -286,28 +313,32 @@ Protected Class Session
 		    activeMedium.InsertRecord("content" , newMediumRecord)
 		    
 		    if activeMedium.Error = true then
-		      rollbackNewDocumentOutcome = rollbackPushData(newDocument)
-		      return new pdOutcome(CurrentMethodName + ":  Error creating content table record: " + activeMedium.ErrorMessage + "  : Rollback outcome: " + if(rollbackNewDocumentOutcome.ok = true , "DONE" , rollbackNewDocumentOutcome.fatalErrorMsg))
+		      dim rollbackOK as String = rollbackPushData(newDocument)
+		      Return new Limnie.Document("Error writing fragmented content to active medium: " + activeMedium.ErrorMessage + " : Attempted Rollback: " + if(rollbackOK = empty , "OK" , rollbackOK))
 		    end if
 		    
 		  loop  // get next fragment if any
 		  
 		  // we need to unlock newly created fragment records
-		  for i as integer = 0 to newDocument.fragments.Ubound
+		  
+		  for i as integer = 0 to newDocument.fragments.Ubound  // this is just to have a simpler update statement
 		    objidxs.Append str(newDocument.fragments(i).objidx)
+		    newDocument.fragments(i).locked = false
+		    totalDocumentSize = totalDocumentSize + newDocument.fragments(i).size
 		  next i
 		  
 		  activeVFS.SQLExecute("UPDATE " + poolname + " SET locked = 'false' WHERE objidx IN (" + join(objidxs , ",") + ")")
-		  if activeVFS.Error = true then  // 
-		    rollbackNewDocumentOutcome = rollbackPushData(newDocument)
-		    return new pdOutcome(CurrentMethodName + ":  Error unlocking document fragments: " + activeVFS.ErrorMessage + "  : Rollback outcome: " + if(rollbackNewDocumentOutcome.ok = true , "DONE" , rollbackNewDocumentOutcome.fatalErrorMsg))
+		  if activeVFS.Error = true then 
+		    dim rollbackOK as String = rollbackPushData(newDocument)
+		    Return new Limnie.Document("Error unlocking pool catalogue entries: " + activeVFS.ErrorMessage + " : Attempted Rollback: " + if(rollbackOK = empty , "OK" , rollbackOK))
 		  end if
 		  
-		  // all went well, return the document objidx in the outcome
+		  newDocument.objidx = newDocument.fragments(0).objidx
+		  newDocument.deleted = false
+		  newDocument.size = totalDocumentSize
+		  newDocument.error = false // of course!
 		  
-		  dim okOutcome as new pdOutcome(true)
-		  okOutcome.returnObject = newDocument.fragments(0).objidx
-		  return okOutcome
+		  Return newDocument
 		End Function
 	#tag EndMethod
 
@@ -867,6 +898,27 @@ Protected Class Session
 	#tag EndMethod
 
 	#tag Method, Flags = &h21
+		Private Function pickSuitableMedium(Media() as Limnie.Medium, contentSize as int64) As integer
+		  // returns -1 if no suitable medium found
+		  dim freeSpaceInMedium as Int64
+		  
+		  for i as Integer = 0 to Media.Ubound  // go through all media for pool
+		    
+		    if Media(i) = nil then Continue for i
+		    if Media(i).open = false then Continue for i // not interested in closed media --redundant if list only contains open media
+		    
+		    freeSpaceInMedium = Media(i).threshold * MByte - Media(i).file.Length
+		    
+		    if freeSpaceInMedium < 0 then Continue for i  // limit has been exceeded for some reason
+		    if freeSpaceInMedium >= contentSize then return Media(i).idx
+		    
+		  next i
+		  
+		  return -1
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
 		Private Function rollbackInitPool(poolname as string) As string
 		  // returns either error message or empty for success
 		  dim ErrorPrefix as string = "Error rolling back new pool creation: " 
@@ -890,36 +942,104 @@ Protected Class Session
 
 	#tag Method, Flags = &h21
 		Private Function rollbackPushData(targetDoc as Limnie.Document) As String
+		  if IsNull(activeVFS) then return "Error rolling back document: Active VFS is invalid"
+		  
 		  dim errors(-1) as string
+		  dim setMediumOK as Limnie.Medium
 		  
 		  for i as integer = 0 to targetDoc.fragments.Ubound
 		    
-		    activeVFS.SQLExecute("DELETE FROM " + targetDoc.pool + " WHERE objidx = " + str(targetDoc.fragments(i).objidx))
+		    activeVFS.SQLExecute("DELETE FROM " + targetDoc.pool + " WHERE objidx = " + str(targetDoc.fragments(i).objidx))  // delete records belonging to fragments created so far
 		    if activeVFS.Error = true then Errors.Append "Error deleting fragment record " + str(targetDoc.fragments(i).objidx) + " : " + activeVFS.ErrorMessage
 		    
-		    if setActiveMedium(targetDoc.pool , targetDoc.fragments(i).mediumidx) = false then errors.Append "Error loading medium " + targetDoc.pool + "." + str(targetDoc.fragments(i).mediumidx) + " : " + getLastError
-		    activeMedium.SQLExecute("DELETE FROM content WHERE objidx = " + str(targetDoc.fragments(i).objidx))
-		    if activeMedium.Error = true then Errors.Append "Error deleting fragment content " + targetDoc.pool + "." + str(targetDoc.fragments(i).mediumidx) + " : " + activeMedium.ErrorMessage
+		    setMediumOK = setActiveMedium(targetDoc.pool , targetDoc.fragments(i).mediumidx)
+		    if setMediumOK.error then 
+		      errors.Append "Error loading medium " + targetDoc.pool + "." + str(targetDoc.fragments(i).mediumidx) + " : " + setMediumOK.errorMessage
+		    else
+		      activeMedium.SQLExecute("DELETE FROM content WHERE objidx = " + str(targetDoc.fragments(i).objidx))
+		      if activeMedium.Error = true then Errors.Append "Error deleting fragment content " + targetDoc.pool + "." + str(targetDoc.fragments(i).mediumidx) + " : " + activeMedium.ErrorMessage
+		    end if
 		    
 		  next i
 		  
 		  if Errors.Ubound < 0 then
-		    return new pdOutcome(true)
+		    return empty  // all ok
 		  else
-		    Return new pdOutcome(CurrentMethodName + " : " + join(errors , " // "))
+		    Return  join(errors , " // ")
 		  end if
 		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h21
 		Private Function setActiveMedium(poolname as string, idx as integer) As Limnie.Medium
-		  dim poolDetails as Limnie.Pool = getPoolDetails(poolname)
-		  if poolDetails.error then Return new Limnie.Medium("Error getting pool " + poolname + " details: " + poolDetails.errorMessage)
-		  
 		  dim mediumDetails as Limnie.Medium = getMediumDetails(poolname , idx)
 		  if mediumDetails.error then return mediumDetails
 		  
-		  ------
+		  if IsNull(activeMedium) = False then
+		    if activeMedium.DatabaseFile.NativePath = mediumDetails.file.NativePath then Return mediumDetails  // activeMedium is already the Medium we're looking to set active
+		  end if
+		  
+		  closeActiveMedium  // close whatever is open, we don't need it
+		  
+		  dim poolDetails as Limnie.Pool = getPoolDetails(poolname)
+		  if poolDetails.error then Return new Limnie.Medium("Error getting pool " + poolname + " details: " + poolDetails.errorMessage)
+		  
+		  if poolDetails.encrypted then 
+		    if encryptedPoolsVerified.IndexOf(poolname) < 0 then // pool password has not been verified
+		      if poolPasswords.HasKey(poolname) then // password is in pool cache  --go on to verify it
+		        dim verifyOK as Pair = testPoolPassword(poolname , poolPasswords.Value(poolname).StringValue)
+		        select case verifyOK.Left.IntegerValue
+		        case 0  // verified
+		          encryptedPoolsVerified.Append poolname  // mark it as verifed
+		        case 1  // infrastructure error
+		          poolPasswords.Remove(poolname)
+		          Return new Limnie.Medium("Infrastructure error while opening medium " + poolname + "." + str(idx) + " : " + verifyOK.Right.StringValue)
+		        case 2  // not verified (or corrupted db)
+		          poolPasswords.Remove(poolname)
+		        else  // should never happen
+		          Return new Limnie.Medium("Internal error while opening medium " + poolname + "." + str(idx))
+		        end Select
+		      end if
+		      if poolPasswords.HasKey(poolname) = false then  // nothing in the password cache --or just removed because it could not be verifed
+		        dim unsalted as String = raiseevent poolPasswordRequest(poolname)  // ask the application for the password
+		        dim salted as string = preparePassword(unsalted , poolDetails.salt)
+		        dim verifyOK as Pair = testPoolPassword(poolname , salted)
+		        select case verifyOK.Left.IntegerValue
+		        case 0  // verified
+		          encryptedPoolsVerified.Append poolname  // mark it as verifed
+		          poolPasswords.Value(poolname) = salted  // add it to the cache
+		        case 1  // infrastructure error
+		          Return new Limnie.Medium("Infrastructure error while opening medium " + poolname + "." + str(idx) + " : " + verifyOK.Right.StringValue)
+		        case 2  // not verified (or corrupted db)
+		          Return new Limnie.Medium("Password not verifed while opening medium " + poolname + "." + str(idx))
+		        else  // should never happen
+		          Return new Limnie.Medium("Internal error while opening medium " + poolname + "." + str(idx))
+		        end Select
+		      end if
+		    else // pool password is reported to have been verified --it ought to exist in the password cache
+		      if poolPasswords.HasKey(poolname) = False then 
+		        encryptedPoolsVerified.Remove(encryptedPoolsVerified.IndexOf(poolname))
+		        return new Limnie.Medium("Internal incosistency: Encrypted pool password is reported as verified but does not exist in cache!" , 2)
+		      end if
+		    end if
+		  end if
+		  
+		  // ------ from this point on, if pool is encrypted, its password ought to be in the password cache (and verified!)
+		  
+		  activeMedium = new SQLiteDatabase
+		  activeMedium.DatabaseFile = mediumDetails.file
+		  activeMedium.Password = poolPasswords.Value(poolname).StringValue
+		  
+		  if activeMedium.Connect then
+		    Return mediumDetails
+		  else
+		    mediumDetails.error = True
+		    mediumDetails.errorMessage = activeMedium.ErrorMessage
+		    mediumDetails.errorCode = 1
+		    Return mediumDetails
+		  end if
+		  
+		  
 		  
 		End Function
 	#tag EndMethod
@@ -1007,10 +1127,22 @@ Protected Class Session
 	#tag EndProperty
 
 	#tag Property, Flags = &h21
+		#tag Note
+			pool names mentioned here have their password verified and stored in session password cache --no need to be verifying them again and again
+			this property is being used by setActiveMedium
+			
+		#tag EndNote
+		Private encryptedPoolsVerified(-1) As string
+	#tag EndProperty
+
+	#tag Property, Flags = &h21
 		Private ErrorMsg As string = """"""
 	#tag EndProperty
 
 	#tag Property, Flags = &h21
+		#tag Note
+			keys are encrypted pool names and values are salted passwords
+		#tag EndNote
 		Private poolPasswords As Dictionary
 	#tag EndProperty
 

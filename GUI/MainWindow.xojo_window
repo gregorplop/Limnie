@@ -766,7 +766,7 @@ Begin Window MainWindow
          Index           =   -2147483648
          InitialParent   =   "MainPanel"
          Italic          =   False
-         Left            =   790
+         Left            =   628
          LockBottom      =   False
          LockedInPosition=   False
          LockLeft        =   False
@@ -1775,7 +1775,7 @@ Begin Window MainWindow
          LockLeft        =   True
          LockRight       =   True
          LockTop         =   True
-         RequiresSelection=   False
+         RequiresSelection=   True
          Scope           =   0
          ScrollbarHorizontal=   False
          ScrollBarVertical=   True
@@ -1859,38 +1859,6 @@ Begin Window MainWindow
          Underline       =   False
          Visible         =   True
          Width           =   124
-      End
-      Begin PushButton ToggleMediumOpenFlagBtn
-         AutoDeactivate  =   True
-         Bold            =   False
-         ButtonStyle     =   "0"
-         Cancel          =   False
-         Caption         =   "Toggle Open flag"
-         Default         =   False
-         Enabled         =   True
-         Height          =   31
-         HelpTag         =   "A closed medium will not accept any more objects"
-         Index           =   -2147483648
-         InitialParent   =   "MainPanel"
-         Italic          =   False
-         Left            =   790
-         LockBottom      =   True
-         LockedInPosition=   False
-         LockLeft        =   False
-         LockRight       =   True
-         LockTop         =   False
-         Scope           =   0
-         TabIndex        =   5
-         TabPanelIndex   =   3
-         TabStop         =   True
-         TextFont        =   "System"
-         TextSize        =   14.0
-         TextUnit        =   0
-         Top             =   492
-         Transparent     =   False
-         Underline       =   False
-         Visible         =   True
-         Width           =   150
       End
       Begin GroupBox ImportSingleFileGroup
          AutoDeactivate  =   True
@@ -2112,7 +2080,7 @@ Begin Window MainWindow
             Alignment       =   0
             AutoDeactivate  =   True
             AutomaticallyCheckSpelling=   False
-            BackColor       =   &cFFFFFF00
+            BackColor       =   &cFFFF8000
             Bold            =   False
             Border          =   True
             CueText         =   ""
@@ -2145,7 +2113,7 @@ Begin Window MainWindow
             TextSize        =   16.0
             TextUnit        =   0
             Top             =   145
-            Transparent     =   False
+            Transparent     =   True
             Underline       =   False
             UseFocusRing    =   True
             Visible         =   True
@@ -2322,6 +2290,38 @@ Begin Window MainWindow
             Visible         =   True
             Width           =   160
          End
+      End
+      Begin PushButton ClearPasswordCacheBtn
+         AutoDeactivate  =   True
+         Bold            =   False
+         ButtonStyle     =   "0"
+         Cancel          =   False
+         Caption         =   "Clear password cache"
+         Default         =   False
+         Enabled         =   True
+         Height          =   25
+         HelpTag         =   ""
+         Index           =   -2147483648
+         InitialParent   =   "MainPanel"
+         Italic          =   False
+         Left            =   790
+         LockBottom      =   False
+         LockedInPosition=   False
+         LockLeft        =   False
+         LockRight       =   True
+         LockTop         =   True
+         Scope           =   0
+         TabIndex        =   24
+         TabPanelIndex   =   1
+         TabStop         =   True
+         TextFont        =   "System"
+         TextSize        =   14.0
+         TextUnit        =   0
+         Top             =   115
+         Transparent     =   False
+         Underline       =   False
+         Visible         =   True
+         Width           =   150
       End
    End
    Begin Timer RefreshTimer
@@ -2695,7 +2695,6 @@ End
 		    
 		    MediaList.Enabled = false
 		    ShowAllPoolMediaBtn.Enabled = false
-		    ToggleMediumOpenFlagBtn.Enabled = False
 		    FilterOpenClosedMediaMenu.Enabled = False
 		    
 		    ImportSingleFileGroup.Enabled = False
@@ -2716,7 +2715,6 @@ End
 		    
 		    MediaList.Enabled = true
 		    ShowAllPoolMediaBtn.Enabled = true
-		    ToggleMediumOpenFlagBtn.Enabled = true
 		    FilterOpenClosedMediaMenu.Enabled = true
 		    
 		    ImportSingleFileGroup.Enabled = true
@@ -3077,6 +3075,14 @@ End
 		End Sub
 	#tag EndEvent
 #tag EndEvents
+#tag Events ClearPasswordCacheBtn
+	#tag Event
+		Sub Action()
+		  if IsNull(activeSession) = false then activeSession.clearPoolPasswordCache
+		  
+		End Sub
+	#tag EndEvent
+#tag EndEvents
 #tag Events RefreshTimer
 	#tag Event
 		Sub Action()
@@ -3328,5 +3334,6 @@ End
 		Name="MediaSurvey_WHERE"
 		Group="Behavior"
 		Type="string"
+		EditorType="MultiLineEditor"
 	#tag EndViewProperty
 #tag EndViewBehavior
