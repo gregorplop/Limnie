@@ -14,6 +14,16 @@ Protected Class Session
 		End Sub
 	#tag EndMethod
 
+	#tag Method, Flags = &h21
+		Private Sub closeActiveMedium()
+		  if IsNull(activeMedium) = false then
+		    activeMedium.Close
+		    activeMedium = nil
+		  end if
+		  
+		End Sub
+	#tag EndMethod
+
 	#tag Method, Flags = &h0
 		Sub Constructor(inputVFS as Limnie.VFS, optional initPoolPasswords as Dictionary)
 		  ErrorMsg = empty
@@ -153,7 +163,151 @@ Protected Class Session
 		  // we now have the password to open media of this pool (if we need it)
 		  
 		  
+		  dim Media(-1) as Limnie.Medium
+		  dim newDocument as new Limnie.Document // log of new records in pool & medium tables for the case of failure and rollback
+		  dim newFragment as Limnie.Fragment // log of new records in pool & medium tables for the case of failure and rollback
+		  dim fragmentData as string
+		  dim PickedMedium as integer
+		  dim md5calculator as new MD5Digest
+		  dim firstObjidx as Int64 = -1
+		  dim newlyCreatedObjidx as int64
+		  dim newPoolCatalogueRecord as DatabaseRecord
+		  dim newMediumRecord as DatabaseRecord
+		  dim trimmedMetadatum as string = metadatum.Trim
+		  dim creationDate as new date
+		  dim finalHash as string = "pending"
+		  dim rollbackNewDocumentOutcome as pdOutcome  //
+		  dim objidxs(-1) as string
+		  dim createMediumOutcome as Limnie.Medium
+		  dim mediumPickTimeout as integer
 		  
+		  newDocument.pool = poolname
+		  
+		  
+		  do until source.EOF
+		    
+		    fragmentData = source.Read(fragmentSize * MByte)  // get a fragment
+		    
+		    if source.ReadError then MsgBox "we need to handle this"  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		    
+		    // we need to decide which medium to write it to
+		    mediumPickTimeout = 0
+		    do
+		      Media = getMediaDetails("pool = '" + poolname + "' AND open = 'true'" , "idx ASC")
+		      
+		      
+		      if Media.Ubound < 0 then   // getMediaDetails failed
+		        rollbackNewDocumentOutcome = rollbackPushData(newDocument)
+		        return new pdOutcome(CurrentMethodName + ": Failed to get media info: " + ErrorMsg +" : Rollback outcome: " + if(rollbackNewDocumentOutcome.ok = true , "DONE" , rollbackNewDocumentOutcome.fatalErrorMsg))
+		      end if
+		      PickedMedium = pickSuitableMedium(Media , fragmentData.LenB) // pick a medium 
+		      
+		      if PickedMedium = -1 then 
+		        createMediumOutcome = createNextMedium(poolname)
+		        
+		        select case createMediumOutcome.fatalErrorCode
+		        case 1  // infrastructure error
+		          rollbackNewDocumentOutcome = rollbackPushData(newDocument)
+		          return new pdOutcome(CurrentMethodName + ": Failed to create new medium (" + createMediumOutcome.fatalErrorMsg + "): Rollback outcome: " + if(rollbackNewDocumentOutcome.ok = true , "DONE" , rollbackNewDocumentOutcome.fatalErrorMsg))
+		        case 2  // maintenance lock on this pool
+		          app.SleepCurrentThread(2000)
+		          mediumPickTimeout = mediumPickTimeout + 1
+		        end select
+		        
+		        if mediumPickTimeout = 10 then
+		          rollbackNewDocumentOutcome = rollbackPushData(newDocument)
+		          return new pdOutcome(CurrentMethodName + ": Timeout while retrying to create new medium (" + createMediumOutcome.fatalErrorMsg + "): Rollback outcome: " + if(rollbackNewDocumentOutcome.ok = true , "DONE" , rollbackNewDocumentOutcome.fatalErrorMsg))
+		        end if
+		      end if
+		    loop until PickedMedium > 0
+		    
+		    
+		    if setActiveMedium(poolname , PickedMedium) = false then  // failed to change medium
+		      rollbackNewDocumentOutcome = rollbackPushData(newDocument)
+		      return new pdOutcome(CurrentMethodName + ": Failed to open medium: " + poolname + str(PickedMedium) + " : Rollback outcome: " + if(rollbackNewDocumentOutcome.ok = true , "DONE" , rollbackNewDocumentOutcome.fatalErrorMsg))
+		    end if
+		    
+		    md5calculator.Process(fragmentData)
+		    
+		    newPoolCatalogueRecord = new DatabaseRecord
+		    newPoolCatalogueRecord.IntegerColumn("mediumidx") = PickedMedium
+		    newPoolCatalogueRecord.Int64Column("size") = fragmentData.LenB
+		    newPoolCatalogueRecord.DateColumn("creationstamp") = creationDate
+		    newPoolCatalogueRecord.DateColumn("lastchange") = creationDate
+		    newPoolCatalogueRecord.BooleanColumn("deleted") = false
+		    newPoolCatalogueRecord.BooleanColumn("locked") = true
+		    if trimmedMetadatum <> empty then newPoolCatalogueRecord.Column("metadatum") = trimmedMetadatum
+		    
+		    if firstObjidx = -1 and readStream.EOF = true then firstObjidx = 0  // this is the first and only fragment
+		    if readStream.EOF = true then finalHash = EncodeHex(md5calculator.Value)  // this is the final fragment
+		    
+		    newPoolCatalogueRecord.Int64Column("firstpart") = firstObjidx
+		    newPoolCatalogueRecord.Column("hash") = finalHash
+		    
+		    activeVFS.InsertRecord(poolname , newPoolCatalogueRecord)  // create the record in the pool catalogue
+		    if activeVFS.Error = true then 
+		      rollbackNewDocumentOutcome = rollbackPushData(newDocument)
+		      return new pdOutcome(CurrentMethodName + ":  Error creating pool table record: " + activeVFS.ErrorMessage + "  : Rollback outcome: " + if(rollbackNewDocumentOutcome.ok = true , "DONE" , rollbackNewDocumentOutcome.fatalErrorMsg))
+		    end if
+		    
+		    newlyCreatedObjidx = activeVFS.LastRowID
+		    
+		    newFragment = new pdstorage_fragment
+		    newFragment.objidx = newlyCreatedObjidx  // necessary for rollback
+		    newFragment.mediumidx = PickedMedium     // necessary for rollback
+		    newDocument.fragments.Append newFragment
+		    
+		    if firstObjidx = -1 then   // first part of a fragmented document has just been stored - it's missing the correct firstpart field value
+		      newDocument.fragmented = true
+		      firstObjidx = newlyCreatedObjidx
+		      activeVFS.SQLExecute("UPDATE " + poolname + " SET firstpart = " + str(firstObjidx) + " WHERE objidx = " + str(firstObjidx))  // update the firstpart field of the first record of a fragmented document
+		      if activeVFS.Error = true then  // 
+		        rollbackNewDocumentOutcome = rollbackPushData(newDocument)
+		        return new pdOutcome(CurrentMethodName + ":  Error updating first fragment record: " + activeVFS.ErrorMessage + "  : Rollback outcome: " + if(rollbackNewDocumentOutcome.ok = true , "DONE" , rollbackNewDocumentOutcome.fatalErrorMsg))
+		      end if
+		    end if
+		    
+		    if firstObjidx > 0 and readStream.EOF = true then  // the last part of a fragmented document, all past records are missing the correct hash
+		      activeVFS.SQLExecute("UPDATE " + poolname + " SET hash = '" + finalHash + "' WHERE firstpart = " + str(firstObjidx))
+		      if activeVFS.Error = true then  // 
+		        rollbackNewDocumentOutcome = rollbackPushData(newDocument)
+		        return new pdOutcome(CurrentMethodName + ":  Error updating document hash: " + activeVFS.ErrorMessage + "  : Rollback outcome: " + if(rollbackNewDocumentOutcome.ok = true , "DONE" , rollbackNewDocumentOutcome.fatalErrorMsg))
+		      end if
+		    end if
+		    
+		    // at this point we have created/updated entries in the pool master table
+		    // we are ready to write content into the selected medium
+		    
+		    newMediumRecord = new DatabaseRecord
+		    newMediumRecord.Int64Column("objidx") = newlyCreatedObjidx
+		    newMediumRecord.Int64Column("firstpart") = firstObjidx
+		    newMediumRecord.BlobColumn("content") = fragmentData
+		    // the correct medium has already been opened
+		    activeMedium.InsertRecord("content" , newMediumRecord)
+		    
+		    if activeMedium.Error = true then
+		      rollbackNewDocumentOutcome = rollbackPushData(newDocument)
+		      return new pdOutcome(CurrentMethodName + ":  Error creating content table record: " + activeMedium.ErrorMessage + "  : Rollback outcome: " + if(rollbackNewDocumentOutcome.ok = true , "DONE" , rollbackNewDocumentOutcome.fatalErrorMsg))
+		    end if
+		    
+		  loop  // get next fragment if any
+		  
+		  // we need to unlock newly created fragment records
+		  for i as integer = 0 to newDocument.fragments.Ubound
+		    objidxs.Append str(newDocument.fragments(i).objidx)
+		  next i
+		  
+		  activeVFS.SQLExecute("UPDATE " + poolname + " SET locked = 'false' WHERE objidx IN (" + join(objidxs , ",") + ")")
+		  if activeVFS.Error = true then  // 
+		    rollbackNewDocumentOutcome = rollbackPushData(newDocument)
+		    return new pdOutcome(CurrentMethodName + ":  Error unlocking document fragments: " + activeVFS.ErrorMessage + "  : Rollback outcome: " + if(rollbackNewDocumentOutcome.ok = true , "DONE" , rollbackNewDocumentOutcome.fatalErrorMsg))
+		  end if
+		  
+		  // all went well, return the document objidx in the outcome
+		  
+		  dim okOutcome as new pdOutcome(true)
+		  okOutcome.returnObject = newDocument.fragments(0).objidx
+		  return okOutcome
 		End Function
 	#tag EndMethod
 
@@ -325,13 +479,13 @@ Protected Class Session
 		  
 		  if IsNull(activeVFS) then Return Array(new Limnie.Medium("VFS not initialized!" , -1))
 		  
-		  if WHERE = empty then WHERE = "TRUE"
-		  if ORDERBY = empty then ORDERBY = "pool , idx ASC"
+		  if WHERE.trim = empty then WHERE = "TRUE"
+		  if ORDERBY.trim = empty then ORDERBY = "pool , idx ASC"
 		  
-		  dim query as string = "SELECT * FROM media WHERE " + WHERE + " " + ORDERBY
+		  dim query as string = "SELECT * FROM media WHERE " + WHERE + " ORDER BY " + ORDERBY
 		  
 		  dim rs as RecordSet = activeVFS.SQLSelect(query)
-		  if activeVFS.Error = true then Return Array(new Limnie.Medium("Error surveying media files: " + activeVFS.ErrorMessage))
+		  if activeVFS.Error = true then Return Array(new Limnie.Medium("Error surveying media files: " + activeVFS.ErrorMessage , -1))
 		  
 		  dim ErrorMessage as string
 		  
@@ -735,6 +889,42 @@ Protected Class Session
 	#tag EndMethod
 
 	#tag Method, Flags = &h21
+		Private Function rollbackPushData(targetDoc as Limnie.Document) As String
+		  dim errors(-1) as string
+		  
+		  for i as integer = 0 to targetDoc.fragments.Ubound
+		    
+		    activeVFS.SQLExecute("DELETE FROM " + targetDoc.pool + " WHERE objidx = " + str(targetDoc.fragments(i).objidx))
+		    if activeVFS.Error = true then Errors.Append "Error deleting fragment record " + str(targetDoc.fragments(i).objidx) + " : " + activeVFS.ErrorMessage
+		    
+		    if setActiveMedium(targetDoc.pool , targetDoc.fragments(i).mediumidx) = false then errors.Append "Error loading medium " + targetDoc.pool + "." + str(targetDoc.fragments(i).mediumidx) + " : " + getLastError
+		    activeMedium.SQLExecute("DELETE FROM content WHERE objidx = " + str(targetDoc.fragments(i).objidx))
+		    if activeMedium.Error = true then Errors.Append "Error deleting fragment content " + targetDoc.pool + "." + str(targetDoc.fragments(i).mediumidx) + " : " + activeMedium.ErrorMessage
+		    
+		  next i
+		  
+		  if Errors.Ubound < 0 then
+		    return new pdOutcome(true)
+		  else
+		    Return new pdOutcome(CurrentMethodName + " : " + join(errors , " // "))
+		  end if
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
+		Private Function setActiveMedium(poolname as string, idx as integer) As Limnie.Medium
+		  dim poolDetails as Limnie.Pool = getPoolDetails(poolname)
+		  if poolDetails.error then Return new Limnie.Medium("Error getting pool " + poolname + " details: " + poolDetails.errorMessage)
+		  
+		  dim mediumDetails as Limnie.Medium = getMediumDetails(poolname , idx)
+		  if mediumDetails.error then return mediumDetails
+		  
+		  ------
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
 		Private Function testPoolPassword(poolname as string, saltedPassword as string) As pair
 		  // returns pair: left = error code (0=ok , 1= could not test , 2=probably no match) right = error message
 		  
@@ -810,10 +1000,6 @@ Protected Class Session
 
 	#tag Property, Flags = &h21
 		Private activeMedium As SQLiteDatabase
-	#tag EndProperty
-
-	#tag Property, Flags = &h21
-		Private activeMediumFilename As string
 	#tag EndProperty
 
 	#tag Property, Flags = &h21

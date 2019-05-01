@@ -1860,12 +1860,12 @@ Begin Window MainWindow
          Visible         =   True
          Width           =   124
       End
-      Begin PushButton MarkAsClosedBtn
+      Begin PushButton ToggleMediumOpenFlagBtn
          AutoDeactivate  =   True
          Bold            =   False
          ButtonStyle     =   "0"
          Cancel          =   False
-         Caption         =   "Mark as Closed"
+         Caption         =   "Toggle Open flag"
          Default         =   False
          Enabled         =   True
          Height          =   31
@@ -2620,13 +2620,13 @@ End
 		  dim poolListed as Boolean
 		  
 		  dim media4pool(-1) as Limnie.Medium
+		  dim WHERE as string
 		  
 		  for i as Integer = 0 to pools.Ubound
 		    pooldetails = activeSession.getPoolDetails(pools(i) , true)
 		    if pooldetails.error then return "Error getting details for pool " + pools(i)
 		    
 		    rowFound = isPoolListed(pooldetails.name)
-		    
 		    if rowFound < 0 then // new pool, not in list
 		      PoolList.AddRow pooldetails.name , str(pooldetails.encrypted) , str(pooldetails.mediaCount)
 		      PoolList.RowTag(PoolList.LastIndex) = pooldetails
@@ -2645,7 +2645,25 @@ End
 		    if poolListed = False then SingleImport2PoolMenu.AddRow pools(i)
 		    
 		    
-		    media4pool = activeSession.getMediaDetails(MediaSurvey_WHERE + " AND " + FilterOpenClosedMediaMenu.RowTag(FilterOpenClosedMediaMenu.ListIndex) , " pool , idx ASC")
+		    WHERE = MediaSurvey_WHERE + " AND " + FilterOpenClosedMediaMenu.RowTag(FilterOpenClosedMediaMenu.ListIndex).StringValue
+		    System.DebugLog(WHERE)
+		    media4pool = activeSession.getMediaDetails(WHERE , " pool , idx ASC")
+		    
+		    if media4pool.Ubound = 0 then
+		      if media4pool(0).error = true and media4pool(0).errorCode = -1 then Return "Infrastructure error while surveying media: " + media4pool(0).errorMessage
+		    end if
+		    for j as Integer = 0 to media4pool.Ubound
+		      rowFound = isMediumListed(media4pool(j).uuid)
+		      if rowFound < 0 then  // new Medium , not in list
+		        MediaList.AddRow media4pool(j).pool , str(media4pool(j).idx) , media4pool(j).uuid , str(media4pool(j).threshold) , str(media4pool(j).utilization) , str(media4pool(j).mounted) , str(media4pool(j).open)
+		        MediaList.RowTag(MediaList.LastIndex) = media4pool(j)
+		      else // medium already in list
+		        MediaList.cell(rowFound , 4) = str(media4pool(j).utilization)
+		        MediaList.cell(rowFound , 5) = str(media4pool(j).mounted)
+		        MediaList.Cell(rowFound , 6) = str(media4pool(j).open)
+		        MediaList.RowTag(rowFound) = media4pool(j)
+		      end if
+		    next j 
 		    
 		    
 		  next i
@@ -2677,7 +2695,7 @@ End
 		    
 		    MediaList.Enabled = false
 		    ShowAllPoolMediaBtn.Enabled = false
-		    MarkAsClosedBtn.Enabled = False
+		    ToggleMediumOpenFlagBtn.Enabled = False
 		    FilterOpenClosedMediaMenu.Enabled = False
 		    
 		    ImportSingleFileGroup.Enabled = False
@@ -2698,10 +2716,12 @@ End
 		    
 		    MediaList.Enabled = true
 		    ShowAllPoolMediaBtn.Enabled = true
-		    MarkAsClosedBtn.Enabled = true
+		    ToggleMediumOpenFlagBtn.Enabled = true
 		    FilterOpenClosedMediaMenu.Enabled = true
 		    
 		    ImportSingleFileGroup.Enabled = true
+		    
+		    MediaSurvey_WHERE = " TRUE "
 		    
 		    RefreshStart
 		    
@@ -2984,7 +3004,7 @@ End
 		  me.Heading(5) = "Mounted"
 		  me.Heading(6) = "Open"
 		  
-		  me.ColumnWidths = "15%,10%,25%,15%,15%,10%,10%"
+		  me.ColumnWidths = "11%,8%,38%,13%,13%,9%,8%"
 		  me.HasHeading = true
 		  me.ColumnsResizable = false
 		  me.HeaderType(-1) = Listbox.HeaderTypes.NotSortable
@@ -3006,19 +3026,32 @@ End
 		End Function
 	#tag EndEvent
 #tag EndEvents
+#tag Events ShowAllPoolMediaBtn
+	#tag Event
+		Sub Action()
+		  MediaSurvey_WHERE = " TRUE "
+		End Sub
+	#tag EndEvent
+#tag EndEvents
 #tag Events FilterOpenClosedMediaMenu
 	#tag Event
 		Sub Open()
 		  me.AddRow "  All"
-		  me.RowTag(me.ListCount - 1) = " TRUE "
+		  me.RowTag(me.ListCount - 1) = " true "
 		  
 		  me.AddRow "  Open"
-		  me.RowTag(me.ListCount - 1) = " open = 'TRUE' "
+		  me.RowTag(me.ListCount - 1) = " open = 'true' "
 		  
 		  me.AddRow "  Closed"
-		  me.RowTag(me.ListCount - 1) = " open = 'FALSE' "
+		  me.RowTag(me.ListCount - 1) = " open = 'false' "
 		  
 		  me.ListIndex = 0
+		  
+		End Sub
+	#tag EndEvent
+	#tag Event
+		Sub Change()
+		  MediaList.DeleteAllRows
 		  
 		End Sub
 	#tag EndEvent
@@ -3290,5 +3323,10 @@ End
 		InitialValue="True"
 		Type="Boolean"
 		EditorType="Boolean"
+	#tag EndViewProperty
+	#tag ViewProperty
+		Name="MediaSurvey_WHERE"
+		Group="Behavior"
+		Type="string"
 	#tag EndViewProperty
 #tag EndViewBehavior
