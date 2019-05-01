@@ -1858,7 +1858,7 @@ Begin Window MainWindow
          Transparent     =   False
          Underline       =   False
          Visible         =   True
-         Width           =   124
+         Width           =   157
       End
       Begin GroupBox ImportSingleFileGroup
          AutoDeactivate  =   True
@@ -2729,6 +2729,24 @@ End
 		End Sub
 	#tag EndMethod
 
+	#tag Method, Flags = &h0
+		Function SingleImport() As Boolean
+		  
+		  dim file as BinaryStream = BinaryStream.Open(GetFolderItem("D:\Software\Windows\Xojo\Xojo2015r24Setup.exe") , False)
+		  
+		  dim newDocument as Limnie.Document = activeSession.createDocument(file , "second" , "testmetadatum" , true)
+		  
+		  if newDocument.error = true then
+		    MsgBox newDocument.errorMessage
+		  else
+		    MsgBox "OK"
+		  end if
+		  
+		  
+		  
+		End Function
+	#tag EndMethod
+
 
 	#tag Property, Flags = &h0
 		activeSession As Limnie.Session
@@ -3034,7 +3052,7 @@ End
 #tag Events FilterOpenClosedMediaMenu
 	#tag Event
 		Sub Open()
-		  me.AddRow "  All"
+		  me.AddRow "  Open && Closed"
 		  me.RowTag(me.ListCount - 1) = " true "
 		  
 		  me.AddRow "  Open"
@@ -3060,6 +3078,13 @@ End
 		  if SingleImportMetaIsFilenameCheck.Value = true then SingleImportMetadataField.Text = me.Text
 		  
 		  
+		End Sub
+	#tag EndEvent
+#tag EndEvents
+#tag Events ImportSingleFileBtn
+	#tag Event
+		Sub Action()
+		  call SingleImport
 		End Sub
 	#tag EndEvent
 #tag EndEvents

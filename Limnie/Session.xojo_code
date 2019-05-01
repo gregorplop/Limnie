@@ -182,8 +182,8 @@ Protected Class Session
 		  newDocument.pool = poolname
 		  newDocument.uuid = uuid
 		  
-		   do until source.EOF
-		     
+		  do until source.EOF
+		    
 		    fragmentData = source.Read(fragmentSize * MByte)  // get a fragment
 		    
 		    if source.ReadError then  // crap, we have to rollback
@@ -197,10 +197,10 @@ Protected Class Session
 		    mediumPickTimeout = 10  // try this number of times
 		    do
 		      Media = getMediaDetails("pool = '" + poolname + "' AND open = 'true'" , "idx ASC")  // get all open media for pool
-		       if Media.Ubound = 0 and Media(0).errorCode = -1 then   // getMediaDetails failed
+		      if Media.Ubound = 0 and Media(0).errorCode = -1 then   // getMediaDetails failed
 		        dim rollbackOK as String = rollbackPushData(newDocument)
 		        Return new Limnie.Document("Media survey error while creating new document: " + Media(0).errorMessage + " : Attempted Rollback: " + if(rollbackOK = empty , "OK" , rollbackOK))
-		       end if
+		      end if
 		      
 		      PickedMedium = pickSuitableMedium(Media , fragmentData.LenB) // try to pick a medium 
 		      
@@ -465,6 +465,91 @@ Protected Class Session
 	#tag Method, Flags = &h21
 		Private Function generateSalt() As string
 		  Return EncodeHex(MD5(str(Microseconds)))
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function getDocumentDetails(poolname as string, id as string) As Limnie.Document
+		  //the id can either be the objidx of the document or its uuid, the method recognized it automatically
+		  
+		  // 
+		  // if isnull(activeVFS) = true then return new pdstorage_document(CurrentMethodName + ": VFS database is no longer active")
+		  // 
+		  // dim rs as RecordSet = activeVFS.SQLSelect("SELECT * FROM " + poolname + " WHERE objidx = " + str(objidx))
+		  // if activeVFS.Error = true then return new pdstorage_document(CurrentMethodName + ": Error while searching for document ID: " + activeVFS.ErrorMessage)
+		  // if rs.RecordCount <> 1 then return new pdstorage_document(CurrentMethodName + ": Document ID " + str(objidx) + " does not exist in pool " + poolname)
+		  // 
+		  // if rs.Field("firstpart").IntegerValue <> 0 and rs.field("firstpart").IntegerValue <> objidx then
+		  // return new pdstorage_document(CurrentMethodName + ": ID " + str(objidx) + " is an intermediate fragment of document " + rs.Field("firstpart").StringValue)
+		  // end if
+		  // 
+		  // dim output as new pdstorage_document
+		  // dim fragment as pdstorage_fragment
+		  // dim medium as pdstorage_medium
+		  // dim mediumInfo as new pdstorage_medium
+		  // 
+		  // output.objidx = rs.Field("objidx").Int64Value
+		  // output.metadatum = rs.Field("metadatum").StringValue
+		  // output.creationStamp = rs.Field("creationstamp").DateValue
+		  // output.lastChangeStamp = rs.Field("lastchange").DateValue
+		  // output.deleted = rs.Field("deleted").BooleanValue
+		  // output.pool = poolname
+		  // output.hash = rs.Field("hash").StringValue
+		  // 
+		  // if rs.Field("firstpart").IntegerValue = 0 then  // document consists of 1 fragment
+		  // output.fragmented = false
+		  // fragment = new pdstorage_fragment
+		  // fragment.objidx = rs.Field("objidx").Int64Value
+		  // fragment.mediumidx = rs.Field("mediumidx").IntegerValue
+		  // fragment.size = rs.Field("size").Int64Value
+		  // output.size = fragment.size
+		  // fragment.locked = rs.Field("locked").BooleanValue
+		  // 
+		  // mediumInfo = getMediumDetails(poolname , fragment.mediumidx)
+		  // if mediumInfo.error = true then return new pdstorage_document(CurrentMethodName + ": Error getting medium info: " + mediumInfo.errorMessage)
+		  // fragment.mediumFile = mediumInfo.folder.Child(getFixedMediumFilename)
+		  // 
+		  // output.fragments.Append fragment
+		  // 
+		  // else  // document consists of multiple fragments
+		  // 
+		  // output.fragmented = true
+		  // 
+		  // rs = activeVFS.SQLSelect("SELECT * FROM " + poolname + " WHERE firstpart = " + str(objidx) + " ORDER BY objidx ASC")
+		  // if activeVFS.Error = true then return new pdstorage_document(CurrentMethodName + ": Error while searching for document ID: " + activeVFS.ErrorMessage)
+		  // if rs.RecordCount = 0 then return new pdstorage_document(CurrentMethodName + ": No fragments found for fragmented document " + str(objidx))
+		  // dim documentSize as Int64 = 0
+		  // 
+		  // while not rs.EOF
+		  // fragment = new pdstorage_fragment
+		  // fragment.objidx = rs.Field("objidx").Int64Value
+		  // fragment.mediumidx = rs.Field("mediumidx").IntegerValue
+		  // fragment.size = rs.Field("size").Int64Value
+		  // documentSize = documentSize + fragment.size
+		  // fragment.locked = rs.Field("locked").BooleanValue
+		  // 
+		  // if mediumInfo.pool = poolname and mediumInfo.idx = fragment.mediumidx then  // fragment belongs to the last inquired medium
+		  // fragment.mediumFile = mediumInfo.folder.Child(getFixedMediumFilename)
+		  // else  //  we need to get medium details
+		  // mediumInfo = new pdstorage_medium
+		  // mediumInfo = getMediumDetails(poolname , fragment.mediumidx)
+		  // if mediumInfo.error = true then return new pdstorage_document(CurrentMethodName + ": Error getting medium info: " + mediumInfo.errorMessage)
+		  // fragment.mediumFile = mediumInfo.folder.Child(getFixedMediumFilename)
+		  // end if
+		  // 
+		  // output.fragments.Append fragment
+		  // rs.MoveNext
+		  // wend
+		  // output.size = documentSize
+		  // 
+		  // if output.fragments(0).objidx <> objidx then // the objidx inquired is not the first fragment of the document: this practice is forbidden
+		  // return new pdstorage_document(CurrentMethodName + ": Document ID " + str(objidx) + " is belongs to a document fragment that is not the first")
+		  // end if
+		  // 
+		  // end if
+		  // 
+		  // return output
+		  
 		End Function
 	#tag EndMethod
 
@@ -918,6 +1003,100 @@ Protected Class Session
 		End Function
 	#tag EndMethod
 
+	#tag Method, Flags = &h0
+		Function readDocument(target as Writeable, poolname as string, uuid as string, optional yielding as Boolean = false) As Limnie.Document
+		  // if IsNull(targetBlock) = true then Return new pdOutcome(CurrentMethodName + ": Data block is null")
+		  // if getPoolNames.IndexOf(poolname) < 0 then return new pdOutcome(CurrentMethodName + ": Pool " + poolname + " does not exist")
+		  // targetBlock = empty
+		  // 
+		  // // preliminary data gathering
+		  // dim poolInfo as pdstorage_pool = getPoolDetails(poolname)  // get pool properties
+		  // if poolInfo.error = true then Return new pdOutcome(CurrentMethodName + ": Error getting pool info: " + poolInfo.errorMessage)
+		  // 
+		  // dim docInfo as pdstorage_document = getDocumentDetails(poolname , objidx)
+		  // if docInfo.error = true then return new pdOutcome(CurrentMethodName + ": Error getting document " + str(objidx) + " details: " + docInfo.errorMessage)
+		  // if docInfo.deleted = true then return new pdOutcome(CurrentMethodName + ": Document " + str(objidx) + " was deleted on " + docInfo.lastChangeStamp.SQLDateTime)
+		  // if docInfo.isLocked = true then return new pdOutcome(CurrentMethodName + ": Document " + str(objidx) + " is locked")
+		  // 
+		  // // if pool is encrypted, we need to look for the password
+		  // if poolInfo.encrypted = true then 
+		  // dim password as string
+		  // dim passwordVerify as pdOutcome = new pdOutcome("default fail") // so as it's not null when we test it
+		  // if poolPasswords.HasKey(poolname) = true then
+		  // passwordVerify = testPoolPassword(poolname , poolPasswords.Value(poolname).StringValue.fromBase64)
+		  // if passwordVerify.fatalErrorCode = 2 then poolPasswords.Remove(poolname) // failed verifying password in cache, it doesn't need to be there anymore
+		  // end if
+		  // 
+		  // if passwordVerify.fatalErrorCode > 0 then // go into this if no password is cached (or cached wrong password)
+		  // password = RaiseEvent poolPasswordRequest(poolname)  // ask the outside world for a password
+		  // passwordVerify = testPoolPassword(poolname , password)
+		  // select case passwordVerify.fatalErrorCode
+		  // case 0  // all good, we have the password
+		  // poolPasswords.Value(poolname) = password.toBase64 // any subsequent password requests will be served by the cache
+		  // case 1  // infrastructure error
+		  // return new pdOutcome(CurrentMethodName + ": Error verifying password: " + passwordVerify.fatalErrorMsg)
+		  // case 2 // probably wrong password
+		  // return new pdOutcome(CurrentMethodName + ": Password not verified")
+		  // end select
+		  // end if
+		  // end if
+		  // 
+		  // // at this point, we either have a verified pool password in cache or this pool is not password protected
+		  // 
+		  // dim fragmentStream as SQLiteBlob
+		  // dim targetStream as new BinaryStream(targetBlock)
+		  // dim md5calculator as new MD5Digest
+		  // dim content as string
+		  // 
+		  // for i as integer = 0 to docInfo.fragments.Ubound // go through all the fragments
+		  // 
+		  // if setActiveMedium(poolname , docInfo.fragments(i).mediumidx) = false then 
+		  // if IsNull(fragmentStream) = false then fragmentStream.close
+		  // targetStream.close
+		  // targetBlock = empty
+		  // Return new pdOutcome(CurrentMethodName + ": Error opening medium " + poolname + "." + str(docInfo.fragments(i).mediumidx) + " : " + getLastError)
+		  // end if
+		  // 
+		  // fragmentStream = activeMedium.OpenBlob("content" , "content" , docInfo.fragments(i).objidx , false)
+		  // if isnull(fragmentStream) = true then 
+		  // targetStream.close
+		  // targetBlock = empty
+		  // Return new pdOutcome(CurrentMethodName + ": Error finding fragment " + str(docInfo.fragments(i).objidx) + " on medium " + poolname + "." + str(docInfo.fragments(i).mediumidx))
+		  // end if 
+		  // 
+		  // while not fragmentStream.EOF
+		  // content = fragmentStream.Read(fragmentSize * MByte)
+		  // targetStream.Write(content)
+		  // 
+		  // if fragmentStream.ReadError = true then
+		  // if IsNull(fragmentStream) = false then fragmentStream.close
+		  // targetStream.close
+		  // targetBlock = empty
+		  // Return new pdOutcome(CurrentMethodName + ": Error reading fragment " + str(docInfo.fragments(i).objidx) + " on medium " + poolname + "." + str(docInfo.fragments(i).mediumidx))
+		  // end if
+		  // 
+		  // md5calculator.Process(content)
+		  // 
+		  // wend
+		  // 
+		  // next i
+		  // 
+		  // if IsNull(fragmentStream) = false then fragmentStream.close
+		  // targetStream.close
+		  // 
+		  // if EncodeHex(md5calculator.Value) <> docInfo.hash then 
+		  // targetBlock = empty
+		  // Return new pdOutcome(CurrentMethodName + ": Error verifying MD5 hash of document " + str(objidx) + " in pool " + poolname)
+		  // end if
+		  // 
+		  // dim okOutcome as new pdOutcome(true)
+		  // okOutcome.returnObject = docInfo.metadatum
+		  // return okOutcome
+		  // 
+		  
+		End Function
+	#tag EndMethod
+
 	#tag Method, Flags = &h21
 		Private Function rollbackInitPool(poolname as string) As string
 		  // returns either error message or empty for success
@@ -1028,9 +1207,15 @@ Protected Class Session
 		  
 		  activeMedium = new SQLiteDatabase
 		  activeMedium.DatabaseFile = mediumDetails.file
-		  activeMedium.Password = poolPasswords.Value(poolname).StringValue
+		  
+		  if poolPasswords.HasKey(poolname) then 
+		    activeMedium.Password = poolPasswords.Value(poolname).StringValue
+		  else
+		    activeMedium.Password = empty
+		  end if
 		  
 		  if activeMedium.Connect then
+		    activeMedium.MultiUser = true  // important!
 		    Return mediumDetails
 		  else
 		    mediumDetails.error = True
@@ -1130,7 +1315,6 @@ Protected Class Session
 		#tag Note
 			pool names mentioned here have their password verified and stored in session password cache --no need to be verifying them again and again
 			this property is being used by setActiveMedium
-			
 		#tag EndNote
 		Private encryptedPoolsVerified(-1) As string
 	#tag EndProperty
