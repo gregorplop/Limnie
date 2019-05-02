@@ -54,7 +54,7 @@ Begin Window MainWindow
       Top             =   20
       Transparent     =   False
       Underline       =   False
-      Value           =   4
+      Value           =   3
       Visible         =   True
       Width           =   940
       Begin PushButton CreateVFSbtn
@@ -2673,7 +2673,7 @@ Begin Window MainWindow
             Visible         =   True
             Width           =   361
          End
-         Begin PushButton SingleImportClearBtn1
+         Begin PushButton SingleExportClearBtn
             AutoDeactivate  =   True
             Bold            =   False
             ButtonStyle     =   "0"
@@ -2750,7 +2750,7 @@ Begin Window MainWindow
       Index           =   -2147483648
       InitialParent   =   ""
       Italic          =   False
-      Left            =   630
+      Left            =   636
       LockBottom      =   True
       LockedInPosition=   False
       LockLeft        =   False
@@ -2762,7 +2762,7 @@ Begin Window MainWindow
       TabIndex        =   2
       TabPanelIndex   =   0
       TabStop         =   True
-      Text            =   "Project Limnie by George Poulopoulos"
+      Text            =   "The Limnie Project repository on GitHub"
       TextAlign       =   2
       TextColor       =   &c0000FF00
       TextFont        =   "System"
@@ -2772,7 +2772,7 @@ Begin Window MainWindow
       Transparent     =   False
       Underline       =   True
       Visible         =   True
-      Width           =   330
+      Width           =   324
    End
 End
 #tag EndWindow
@@ -3497,8 +3497,11 @@ End
 		  #Endif
 		  
 		  if SingleImportMetaIsFilenameCheck.Value = true then
-		     SingleImportMetadataField.Text = me.Text.NthField(folderDelimiter , me.Text.CountFields(folderDelimiter))
+		    SingleImportMetadataField.Text = me.Text.NthField(folderDelimiter , me.Text.CountFields(folderDelimiter))
 		  end if
+		  
+		  SingleImportUUIDfield.Text = ""
+		  
 		End Sub
 	#tag EndEvent
 	#tag Event
@@ -3548,8 +3551,6 @@ End
 		End Sub
 	#tag EndEvent
 #tag EndEvents
-#tag Events SingleExportSourceUUIDfield
-#tag EndEvents
 #tag Events SingleExportDoItBtn
 	#tag Event
 		Sub Action()
@@ -3569,7 +3570,7 @@ End
 		End Sub
 	#tag EndEvent
 #tag EndEvents
-#tag Events SingleImportClearBtn1
+#tag Events SingleExportClearBtn
 	#tag Event
 		Sub Action()
 		  SingleExportSourceUUIDfield.Text = ""
@@ -3596,7 +3597,7 @@ End
 #tag Events projectLink
 	#tag Event
 		Function MouseDown(X As Integer, Y As Integer) As Boolean
-		  ShowURL("https://github.com/gregorplop/Limnie")
+		  ShowURL(LimnieProjectURL)
 		  
 		End Function
 	#tag EndEvent

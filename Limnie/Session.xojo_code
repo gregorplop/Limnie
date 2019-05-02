@@ -1236,6 +1236,7 @@ Protected Class Session
 		    mediumDetails.error = True
 		    mediumDetails.errorMessage = activeMedium.ErrorMessage
 		    mediumDetails.errorCode = 1
+		    closeActiveMedium
 		    Return mediumDetails
 		  end if
 		  

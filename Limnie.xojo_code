@@ -335,6 +335,11 @@ Protected Module Limnie
 
 
 	#tag Property, Flags = &h1
+		#tag Note
+			this is used by the generateUUID method.
+			if you replace the UUID mechanism with something else, you can safely remove this property
+			
+		#tag EndNote
 		Protected localDB As SQLiteDatabase
 	#tag EndProperty
 
@@ -345,6 +350,9 @@ Protected Module Limnie
 	#tag Constant, Name = fragmentSize, Type = Double, Dynamic = False, Default = \"8", Scope = Public
 	#tag EndConstant
 
+	#tag Constant, Name = LimnieProjectURL, Type = Text, Dynamic = False, Default = \"https://github.com/gregorplop/Limnie", Scope = Public
+	#tag EndConstant
+
 	#tag Constant, Name = LimnieVersion, Type = Double, Dynamic = False, Default = \"0.5", Scope = Public
 	#tag EndConstant
 
@@ -352,9 +360,6 @@ Protected Module Limnie
 	#tag EndConstant
 
 	#tag Constant, Name = mediumFilename, Type = String, Dynamic = False, Default = \"Limnie_medium", Scope = Private
-	#tag EndConstant
-
-	#tag Constant, Name = ProjectURL, Type = Text, Dynamic = False, Default = \"https://github.com/gregorplop/Limnie", Scope = Public
 	#tag EndConstant
 
 
