@@ -500,70 +500,65 @@ Protected Class Session
 		  
 		  dim output as new Limnie.Document
 		  dim fragment as Limnie.Fragment
-		  //dim medium as Limnie.Medium
 		  dim mediumInfo as new Limnie.Medium
 		  
-		  // output.objidx = rs.Field("objidx").Int64Value
-		  // output.metadatum = rs.Field("metadatum").StringValue
-		  // output.creationStamp = rs.Field("creationstamp").DateValue
-		  // output.lastChangeStamp = rs.Field("lastchange").DateValue
-		  // output.deleted = rs.Field("deleted").BooleanValue
-		  // output.pool = poolname
-		  // output.hash = rs.Field("hash").StringValue
-		  // 
-		  // if rs.Field("firstpart").IntegerValue = 0 then  // document consists of 1 fragment
-		  // output.fragmented = false
-		  // fragment = new pdstorage_fragment
-		  // fragment.objidx = rs.Field("objidx").Int64Value
-		  // fragment.mediumidx = rs.Field("mediumidx").IntegerValue
-		  // fragment.size = rs.Field("size").Int64Value
-		  // output.size = fragment.size
-		  // fragment.locked = rs.Field("locked").BooleanValue
-		  // 
-		  // mediumInfo = getMediumDetails(poolname , fragment.mediumidx)
-		  // if mediumInfo.error = true then return new pdstorage_document(CurrentMethodName + ": Error getting medium info: " + mediumInfo.errorMessage)
-		  // fragment.mediumFile = mediumInfo.folder.Child(getFixedMediumFilename)
-		  // 
-		  // output.fragments.Append fragment
-		  // 
-		  // else  // document consists of multiple fragments
-		  // 
-		  // output.fragmented = true
-		  // 
-		  // rs = activeVFS.SQLSelect("SELECT * FROM " + poolname + " WHERE firstpart = " + str(objidx) + " ORDER BY objidx ASC")
-		  // if activeVFS.Error = true then return new pdstorage_document(CurrentMethodName + ": Error while searching for document ID: " + activeVFS.ErrorMessage)
-		  // if rs.RecordCount = 0 then return new pdstorage_document(CurrentMethodName + ": No fragments found for fragmented document " + str(objidx))
-		  // dim documentSize as Int64 = 0
-		  // 
-		  // while not rs.EOF
-		  // fragment = new pdstorage_fragment
-		  // fragment.objidx = rs.Field("objidx").Int64Value
-		  // fragment.mediumidx = rs.Field("mediumidx").IntegerValue
-		  // fragment.size = rs.Field("size").Int64Value
-		  // documentSize = documentSize + fragment.size
-		  // fragment.locked = rs.Field("locked").BooleanValue
-		  // 
-		  // if mediumInfo.pool = poolname and mediumInfo.idx = fragment.mediumidx then  // fragment belongs to the last inquired medium
-		  // fragment.mediumFile = mediumInfo.folder.Child(getFixedMediumFilename)
-		  // else  //  we need to get medium details
-		  // mediumInfo = new pdstorage_medium
-		  // mediumInfo = getMediumDetails(poolname , fragment.mediumidx)
-		  // if mediumInfo.error = true then return new pdstorage_document(CurrentMethodName + ": Error getting medium info: " + mediumInfo.errorMessage)
-		  // fragment.mediumFile = mediumInfo.folder.Child(getFixedMediumFilename)
-		  // end if
-		  // 
-		  // output.fragments.Append fragment
-		  // rs.MoveNext
-		  // wend
-		  // output.size = documentSize
-		  // 
-		  // if output.fragments(0).objidx <> objidx then // the objidx inquired is not the first fragment of the document: this practice is forbidden
-		  // return new pdstorage_document(CurrentMethodName + ": Document ID " + str(objidx) + " is belongs to a document fragment that is not the first")
-		  // end if
-		  // 
-		  // end if
-		  // 
-		  // return output
+		  output.objidx = rs.Field("objidx").Int64Value
+		  output.metadatum = rs.Field("metadatum").StringValue
+		  output.creationStamp = rs.Field("creationstamp").DateValue
+		  output.lastChangeStamp = rs.Field("lastchange").DateValue
+		  output.deleted = rs.Field("deleted").BooleanValue
+		  output.pool = poolname
+		  output.hash = rs.Field("hash").StringValue
+		  output.uuid = rs.Field("uuid").StringValue
+		  
+		  if rs.Field("firstpart").IntegerValue = 0 then  // document consists of 1 fragment
+		    output.fragmented = false
+		    fragment = new Limnie.Fragment
+		    fragment.objidx = rs.Field("objidx").Int64Value
+		    fragment.mediumidx = rs.Field("mediumidx").IntegerValue
+		    fragment.size = rs.Field("size").Int64Value
+		    output.size = fragment.size
+		    fragment.locked = rs.Field("locked").BooleanValue
+		    
+		    mediumInfo = getMediumDetails(poolname , fragment.mediumidx)
+		    if mediumInfo.error = true then return new Limnie.Document("Error getting medium info: " + mediumInfo.errorMessage)
+		    fragment.mediumFile = mediumInfo.folder.Child(mediumFilename)
+		    
+		    output.fragments.Append fragment
+		    
+		  else  // document consists of multiple fragments
+		    
+		    output.fragmented = true
+		    
+		    rs = activeVFS.SQLSelect("SELECT * FROM " + poolname + " WHERE firstpart = " + str(output.objidx) + " ORDER BY objidx ASC")
+		    if activeVFS.Error = true then return new Limnie.Document("Error while querying for fragments : " + activeVFS.ErrorMessage)
+		    if rs.RecordCount = 0 then return new Limnie.Document("No fragments found for fragmented document " + str(id))
+		    dim documentSize as Int64 = 0
+		    
+		    while not rs.EOF
+		      fragment = new Limnie.Fragment
+		      fragment.objidx = rs.Field("objidx").Int64Value
+		      fragment.mediumidx = rs.Field("mediumidx").IntegerValue
+		      fragment.size = rs.Field("size").Int64Value
+		      documentSize = documentSize + fragment.size
+		      fragment.locked = rs.Field("locked").BooleanValue
+		      
+		      if mediumInfo.pool = poolname and mediumInfo.idx = fragment.mediumidx then  // fragment belongs to the last inquired medium
+		        fragment.mediumFile = mediumInfo.folder.Child(mediumFilename)
+		      else  //  we need to get medium details
+		        mediumInfo = getMediumDetails(poolname , fragment.mediumidx)
+		        if mediumInfo.error = true then return new Limnie.Document("Error getting medium info: " + mediumInfo.errorMessage)
+		        fragment.mediumFile = mediumInfo.folder.Child(mediumFilename)
+		      end if
+		      
+		      output.fragments.Append fragment
+		      rs.MoveNext
+		    wend
+		    output.size = documentSize
+		    
+		  end if
+		  
+		  return output
 		  
 		End Function
 	#tag EndMethod
@@ -942,6 +937,7 @@ Protected Class Session
 		  dim insert as string
 		  
 		  statements.Append "CREATE TABLE " + newPool.name + " (objidx INTEGER PRIMARY KEY , uuid TEXT , mediumidx INTEGER NOT NULL , firstpart INTEGER NOT NULL , metadatum TEXT , size INTEGER NOT NULL , hash TEXT NOT NULL , creationstamp DATETIME NOT NULL , lastchange DATETIME NOT NULL , deleted BOOLEAN NOT NULL , locked BOOLEAN NOT NULL)"
+		  statements.Append "CREATE INDEX " + newPool.name + "_uuid ON " + newPool.name + "(uuid)"  // this will speed up global uuid searches when object count becomes too high
 		  
 		  dim uuid as String = generateUUID
 		  if uuid = empty then return new Limnie.Pool("Error creating pool: Could not generate pool UUID")
@@ -993,6 +989,39 @@ Protected Class Session
 		  newPool.errorMessage = empty
 		  
 		  return newPool
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function locateDocumentUUID(uuid as string) As Limnie.Pool
+		  // locates the pool of a document UUID by means of consequent queries following an "informed" Monte Carlo approach
+		  // informed Monte Carlo meaning random pool selection but always last resulted pool is searched first
+		  // only returns Limnie.Pool.name or error
+		  
+		  static lastPoolFound as String
+		  
+		  dim pools(-1) as String = getPoolNames
+		  if ErrorMsg <> empty then return new Limnie.Pool("Error surveying pools for document " + uuid + " : " + ErrorMsg)
+		  if pools.Ubound < 0 then return new Limnie.Pool("This Limnie contains no storage pools")
+		  
+		  dim lastPoolFoundIDX as Integer = pools.IndexOf(lastPoolFound)
+		  if lastPoolFoundIDX >= 0 then
+		    pools.Remove(lastPoolFoundIDX)
+		    pools.Shuffle
+		    pools.Insert(0 , lastPoolFound)
+		  else  // pool has been removed since
+		    lastPoolFound = empty
+		    pools.Shuffle
+		  end if
+		  
+		  dim rs as RecordSet
+		  
+		  for i as Integer = 0 to pools.Ubound
+		    
+		    //...
+		    
+		  next i
 		  
 		End Function
 	#tag EndMethod

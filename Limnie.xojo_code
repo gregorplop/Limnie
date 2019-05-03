@@ -338,7 +338,6 @@ Protected Module Limnie
 		#tag Note
 			this is used by the generateUUID method.
 			if you replace the UUID mechanism with something else, you can safely remove this property
-			
 		#tag EndNote
 		Protected localDB As SQLiteDatabase
 	#tag EndProperty

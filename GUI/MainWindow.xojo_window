@@ -54,7 +54,7 @@ Begin Window MainWindow
       Top             =   20
       Transparent     =   False
       Underline       =   False
-      Value           =   3
+      Value           =   4
       Visible         =   True
       Width           =   940
       Begin PushButton CreateVFSbtn
@@ -2383,73 +2383,6 @@ Begin Window MainWindow
          Underline       =   False
          Visible         =   True
          Width           =   900
-         Begin Label SingleExportFromPoolLabel
-            AutoDeactivate  =   True
-            Bold            =   False
-            DataField       =   ""
-            DataSource      =   ""
-            Enabled         =   True
-            Height          =   30
-            HelpTag         =   ""
-            Index           =   -2147483648
-            InitialParent   =   "ExportSingleObjectGroup"
-            Italic          =   False
-            Left            =   60
-            LockBottom      =   False
-            LockedInPosition=   False
-            LockLeft        =   True
-            LockRight       =   False
-            LockTop         =   True
-            Multiline       =   False
-            Scope           =   0
-            Selectable      =   False
-            TabIndex        =   0
-            TabPanelIndex   =   5
-            TabStop         =   True
-            Text            =   "Pool"
-            TextAlign       =   0
-            TextColor       =   &c00000000
-            TextFont        =   "System"
-            TextSize        =   16.0
-            TextUnit        =   0
-            Top             =   113
-            Transparent     =   True
-            Underline       =   False
-            Visible         =   True
-            Width           =   126
-         End
-         Begin PopupMenu SingleExportFromPoolMenu
-            AutoDeactivate  =   True
-            Bold            =   False
-            DataField       =   ""
-            DataSource      =   ""
-            Enabled         =   True
-            Height          =   30
-            HelpTag         =   ""
-            Index           =   -2147483648
-            InitialParent   =   "ExportSingleObjectGroup"
-            InitialValue    =   ""
-            Italic          =   False
-            Left            =   60
-            ListIndex       =   0
-            LockBottom      =   False
-            LockedInPosition=   False
-            LockLeft        =   True
-            LockRight       =   False
-            LockTop         =   True
-            Scope           =   0
-            TabIndex        =   1
-            TabPanelIndex   =   5
-            TabStop         =   True
-            TextFont        =   "System"
-            TextSize        =   16.0
-            TextUnit        =   0
-            Top             =   145
-            Transparent     =   False
-            Underline       =   False
-            Visible         =   True
-            Width           =   126
-         End
          Begin TextField SingleExportSourceUUIDfield
             AcceptTabs      =   False
             Alignment       =   0
@@ -2468,7 +2401,7 @@ Begin Window MainWindow
             Index           =   -2147483648
             InitialParent   =   "ExportSingleObjectGroup"
             Italic          =   False
-            Left            =   198
+            Left            =   60
             LimitText       =   0
             LockBottom      =   False
             LockedInPosition=   False
@@ -2492,7 +2425,7 @@ Begin Window MainWindow
             Underline       =   False
             UseFocusRing    =   True
             Visible         =   True
-            Width           =   201
+            Width           =   339
          End
          Begin PushButton SingleExportDoItBtn
             AutoDeactivate  =   True
@@ -2581,7 +2514,7 @@ Begin Window MainWindow
             Index           =   -2147483648
             InitialParent   =   "ExportSingleObjectGroup"
             Italic          =   False
-            Left            =   198
+            Left            =   60
             LockBottom      =   False
             LockedInPosition=   False
             LockLeft        =   True
@@ -2686,7 +2619,7 @@ Begin Window MainWindow
             Index           =   -2147483648
             InitialParent   =   "ExportSingleObjectGroup"
             Italic          =   False
-            Left            =   198
+            Left            =   60
             LockBottom      =   False
             LockedInPosition=   False
             LockLeft        =   True
@@ -3027,7 +2960,6 @@ End
 		    next j
 		    if poolListed = False then 
 		      SingleImport2PoolMenu.AddRow pools(i)
-		      SingleExportFromPoolMenu.AddRow pools(i)
 		    end if
 		    
 		    WHERE = MediaSurvey_WHERE + " AND " + FilterOpenClosedMediaMenu.RowTag(FilterOpenClosedMediaMenu.ListIndex).StringValue
