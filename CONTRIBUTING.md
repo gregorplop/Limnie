@@ -1,8 +1,7 @@
 # Contributing
 
 Limnie is a project that still has a long way to go before reaching some acceptable level of maturity.\
-
-
+If you find it useful and want to see it grow, here's what you can do!
 
 ## Ways you can contribute (from most important to least)
 * Stress-test Limnie\
