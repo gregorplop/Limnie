@@ -462,6 +462,50 @@ Protected Class Session
 		End Sub
 	#tag EndMethod
 
+	#tag Method, Flags = &h0
+		Function findPoolOfDocUUID(uuid as string) As Limnie.Document
+		  // locates the pool of a document UUID by means of consequent queries following an "informed" Monte Carlo approach
+		  // informed Monte Carlo meaning random pool selection but always last resulted pool is searched first
+		  // if uuid is found in a pool then Limnie.Pool.name contains is 
+		  // if it's not found but there was no error in the process, name is empty
+		  
+		  static lastPoolFound as String
+		  
+		  dim pools(-1) as String = getPoolNames
+		  if ErrorMsg <> empty then return new Limnie.Document("Error surveying pools for document " + uuid + " : " + ErrorMsg)
+		  if pools.Ubound < 0 then return new Limnie.Document("This Limnie contains no storage pools")
+		  
+		  dim lastPoolFoundIDX as Integer = pools.IndexOf(lastPoolFound)
+		  if lastPoolFoundIDX >= 0 then
+		    pools.Remove(lastPoolFoundIDX)
+		    pools.Shuffle
+		    pools.Insert(0 , lastPoolFound)
+		  else  // pool has been removed since
+		    lastPoolFound = empty
+		    pools.Shuffle
+		  end if
+		  
+		  dim rs as RecordSet
+		  
+		  dim output as new Limnie.Document
+		  output.pool = empty // just making it excpicit that if uuid is not found in any pool then this is the return value
+		  
+		  for i as Integer = 0 to pools.Ubound
+		    rs = activeVFS.SQLSelect("SELECT COUNT(uuid) FROM " + pools(i) + " WHERE uuid = " + uuid.sqlQuote)
+		    if activeVFS.Error then return new Limnie.Document("Error looking for document UUID in pool: " + activeVFS.ErrorMessage)
+		    if rs.IdxField(1).IntegerValue > 0 then
+		      output.pool = pools(i)
+		      return output
+		    end if
+		  next i
+		  
+		  Return output  // name = empty
+		  
+		  
+		  
+		End Function
+	#tag EndMethod
+
 	#tag Method, Flags = &h21
 		Private Function generateSalt() As string
 		  Return EncodeHex(MD5(str(Microseconds)))
@@ -476,6 +520,10 @@ Protected Class Session
 		  dim isUUID as Boolean
 		  if IsNumeric(id) then isUUID = false else isUUID = true  // and if it's not a uuid then it's an objidx
 		  
+		  if isUUID then 
+		    if validateUUID(id) = false then return new Limnie.Document("Requested document details of invalid UUID")
+		  end if
+		  
 		  dim rs as RecordSet
 		  dim query as String = "SELECT * FROM '" + poolname + "' WHERE "
 		  
@@ -487,6 +535,8 @@ Protected Class Session
 		  
 		  if IncludeDeleted then query = query + " AND deleted = 'true'"
 		  query = query + " ORDER BY objidx ASC LIMIT 1"
+		  
+		  rs = activeVFS.SQLSelect(query)
 		  
 		  if activeVFS.Error then return new Limnie.Document("Error querying pool " + poolname + " for document ID " + id + " : " + activeVFS.ErrorMessage)
 		  if rs.RecordCount = 0 then return new Limnie.Document("Document ID " + id + " does not exist in pool " + poolname)
@@ -993,39 +1043,6 @@ Protected Class Session
 		End Function
 	#tag EndMethod
 
-	#tag Method, Flags = &h0
-		Function locateDocumentUUID(uuid as string) As Limnie.Pool
-		  // locates the pool of a document UUID by means of consequent queries following an "informed" Monte Carlo approach
-		  // informed Monte Carlo meaning random pool selection but always last resulted pool is searched first
-		  // only returns Limnie.Pool.name or error
-		  
-		  static lastPoolFound as String
-		  
-		  dim pools(-1) as String = getPoolNames
-		  if ErrorMsg <> empty then return new Limnie.Pool("Error surveying pools for document " + uuid + " : " + ErrorMsg)
-		  if pools.Ubound < 0 then return new Limnie.Pool("This Limnie contains no storage pools")
-		  
-		  dim lastPoolFoundIDX as Integer = pools.IndexOf(lastPoolFound)
-		  if lastPoolFoundIDX >= 0 then
-		    pools.Remove(lastPoolFoundIDX)
-		    pools.Shuffle
-		    pools.Insert(0 , lastPoolFound)
-		  else  // pool has been removed since
-		    lastPoolFound = empty
-		    pools.Shuffle
-		  end if
-		  
-		  dim rs as RecordSet
-		  
-		  for i as Integer = 0 to pools.Ubound
-		    
-		    //...
-		    
-		  next i
-		  
-		End Function
-	#tag EndMethod
-
 	#tag Method, Flags = &h21
 		Private Function pickSuitableMedium(Media() as Limnie.Medium, contentSize as int64) As integer
 		  // returns -1 if no suitable medium found
@@ -1049,94 +1066,60 @@ Protected Class Session
 
 	#tag Method, Flags = &h0
 		Function readDocument(target as Writeable, poolname as string, uuid as string, optional yielding as Boolean = false) As Limnie.Document
-		  // if IsNull(targetBlock) = true then Return new pdOutcome(CurrentMethodName + ": Data block is null")
-		  // if getPoolNames.IndexOf(poolname) < 0 then return new pdOutcome(CurrentMethodName + ": Pool " + poolname + " does not exist")
-		  // targetBlock = empty
-		  // 
-		  // // preliminary data gathering
-		  // dim poolInfo as pdstorage_pool = getPoolDetails(poolname)  // get pool properties
-		  // if poolInfo.error = true then Return new pdOutcome(CurrentMethodName + ": Error getting pool info: " + poolInfo.errorMessage)
-		  // 
-		  // dim docInfo as pdstorage_document = getDocumentDetails(poolname , objidx)
-		  // if docInfo.error = true then return new pdOutcome(CurrentMethodName + ": Error getting document " + str(objidx) + " details: " + docInfo.errorMessage)
-		  // if docInfo.deleted = true then return new pdOutcome(CurrentMethodName + ": Document " + str(objidx) + " was deleted on " + docInfo.lastChangeStamp.SQLDateTime)
-		  // if docInfo.isLocked = true then return new pdOutcome(CurrentMethodName + ": Document " + str(objidx) + " is locked")
-		  // 
-		  // // if pool is encrypted, we need to look for the password
-		  // if poolInfo.encrypted = true then 
-		  // dim password as string
-		  // dim passwordVerify as pdOutcome = new pdOutcome("default fail") // so as it's not null when we test it
-		  // if poolPasswords.HasKey(poolname) = true then
-		  // passwordVerify = testPoolPassword(poolname , poolPasswords.Value(poolname).StringValue.fromBase64)
-		  // if passwordVerify.fatalErrorCode = 2 then poolPasswords.Remove(poolname) // failed verifying password in cache, it doesn't need to be there anymore
-		  // end if
-		  // 
-		  // if passwordVerify.fatalErrorCode > 0 then // go into this if no password is cached (or cached wrong password)
-		  // password = RaiseEvent poolPasswordRequest(poolname)  // ask the outside world for a password
-		  // passwordVerify = testPoolPassword(poolname , password)
-		  // select case passwordVerify.fatalErrorCode
-		  // case 0  // all good, we have the password
-		  // poolPasswords.Value(poolname) = password.toBase64 // any subsequent password requests will be served by the cache
-		  // case 1  // infrastructure error
-		  // return new pdOutcome(CurrentMethodName + ": Error verifying password: " + passwordVerify.fatalErrorMsg)
-		  // case 2 // probably wrong password
-		  // return new pdOutcome(CurrentMethodName + ": Password not verified")
-		  // end select
-		  // end if
-		  // end if
-		  // 
-		  // // at this point, we either have a verified pool password in cache or this pool is not password protected
-		  // 
-		  // dim fragmentStream as SQLiteBlob
-		  // dim targetStream as new BinaryStream(targetBlock)
-		  // dim md5calculator as new MD5Digest
-		  // dim content as string
-		  // 
-		  // for i as integer = 0 to docInfo.fragments.Ubound // go through all the fragments
-		  // 
-		  // if setActiveMedium(poolname , docInfo.fragments(i).mediumidx) = false then 
-		  // if IsNull(fragmentStream) = false then fragmentStream.close
-		  // targetStream.close
-		  // targetBlock = empty
-		  // Return new pdOutcome(CurrentMethodName + ": Error opening medium " + poolname + "." + str(docInfo.fragments(i).mediumidx) + " : " + getLastError)
-		  // end if
-		  // 
-		  // fragmentStream = activeMedium.OpenBlob("content" , "content" , docInfo.fragments(i).objidx , false)
-		  // if isnull(fragmentStream) = true then 
-		  // targetStream.close
-		  // targetBlock = empty
-		  // Return new pdOutcome(CurrentMethodName + ": Error finding fragment " + str(docInfo.fragments(i).objidx) + " on medium " + poolname + "." + str(docInfo.fragments(i).mediumidx))
-		  // end if 
-		  // 
-		  // while not fragmentStream.EOF
-		  // content = fragmentStream.Read(fragmentSize * MByte)
-		  // targetStream.Write(content)
-		  // 
-		  // if fragmentStream.ReadError = true then
-		  // if IsNull(fragmentStream) = false then fragmentStream.close
-		  // targetStream.close
-		  // targetBlock = empty
-		  // Return new pdOutcome(CurrentMethodName + ": Error reading fragment " + str(docInfo.fragments(i).objidx) + " on medium " + poolname + "." + str(docInfo.fragments(i).mediumidx))
-		  // end if
-		  // 
-		  // md5calculator.Process(content)
-		  // 
-		  // wend
-		  // 
-		  // next i
-		  // 
-		  // if IsNull(fragmentStream) = false then fragmentStream.close
-		  // targetStream.close
-		  // 
-		  // if EncodeHex(md5calculator.Value) <> docInfo.hash then 
-		  // targetBlock = empty
-		  // Return new pdOutcome(CurrentMethodName + ": Error verifying MD5 hash of document " + str(objidx) + " in pool " + poolname)
-		  // end if
-		  // 
-		  // dim okOutcome as new pdOutcome(true)
-		  // okOutcome.returnObject = docInfo.metadatum
-		  // return okOutcome
-		  // 
+		  if IsNull(target) then return new Limnie.Document("Invalid storage target when retrieving data from Limnie!")
+		  if IsNull(activeVFS) then return new Limnie.Document("VFS has been disconnected!")
+		  
+		  if validateUUID(uuid) = False then return new Limnie.Document("Requested document UUID is invalid!")
+		  
+		  dim docInfo as Limnie.Document = getDocumentDetails(poolname , uuid)
+		  if docInfo.error then return new Limnie.Document("Error retrieving document " + uuid + " : " + docInfo.errorMessage)
+		  if docInfo.deleted then return new Limnie.Document("Document " + uuid + " deleted on " + docInfo.lastChangeStamp.SQLDateTime)
+		  if docInfo.isLocked then return new Limnie.Document("Document " + uuid + " is locked")
+		  
+		  dim setMediumOK as Limnie.Medium
+		  dim fragmentStream as SQLiteBlob
+		  dim md5calculator as new MD5Digest
+		  dim content as string
+		  
+		  for i as integer = 0 to docInfo.fragments.Ubound // go through all the fragments
+		    
+		    setMediumOK = setActiveMedium(poolname , docInfo.fragments(i).mediumidx) // password request for encrypted medium will happen here
+		    if setMediumOK.error then Return new Limnie.Document("Error opening medium " + poolname + "." + str(docInfo.fragments(i).mediumidx) + " : " + getLastError)
+		    
+		    fragmentStream = activeMedium.OpenBlob("content" , "content" , docInfo.fragments(i).objidx , false)
+		    if isnull(fragmentStream) then Return new Limnie.Document("Error opening fragment " + str(docInfo.fragments(i).objidx) + " on medium " + poolname + "." + str(docInfo.fragments(i).mediumidx))
+		    
+		    while not fragmentStream.EOF
+		      
+		      content = fragmentStream.Read(fragmentSize * MByte)
+		      
+		      if fragmentStream.ReadError then
+		        fragmentStream.Close
+		        Return new Limnie.Document("Error reading fragment " + str(docInfo.fragments(i).objidx) + " on medium " + poolname + "." + str(docInfo.fragments(i).mediumidx))
+		      end if
+		      
+		      if yielding then app.YieldToNextThread
+		      
+		      target.Write(content)
+		      
+		      if target.WriteError then
+		        fragmentStream.Close
+		        Return new Limnie.Document("Error writing fragment " + str(docInfo.fragments(i).objidx) + " on medium " + poolname + "." + str(docInfo.fragments(i).mediumidx))
+		      end if
+		      
+		      md5calculator.Process(content)
+		      
+		    wend
+		    
+		    fragmentStream.Close
+		    
+		  next i
+		  
+		  
+		  if EncodeHex(md5calculator.Value) <> docInfo.hash then Return new Limnie.Document("Error verifying retrieved document " + uuid)
+		   
+		  Return docInfo
+		  
 		  
 		End Function
 	#tag EndMethod
@@ -1338,6 +1321,21 @@ Protected Class Session
 		  if activeVFS.Error then return new Limnie.Pool("Error updating pool details: " + activeVFS.ErrorMessage)
 		  
 		  return targetPool
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function validateUUID(uuid as String) As Boolean
+		  if uuid.len <> 36 then return false
+		  if uuid.CountFields("-") <> 5 then return false
+		  if uuid.InStr(" ") > 0 then return false
+		  
+		  for i as Integer = 1 to 5
+		    if EncodeHex(DecodeHex(uuid.NthField("-" , i))).Uppercase <> uuid.NthField("-" , i).Uppercase then Return false
+		  next i
+		  
+		  return true
 		  
 		End Function
 	#tag EndMethod

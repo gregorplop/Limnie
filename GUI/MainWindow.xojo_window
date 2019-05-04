@@ -2712,6 +2712,13 @@ End
 
 #tag WindowCode
 	#tag Event
+		Sub Close()
+		  if IsNull(activeSession) = false then activeSession.Close
+		  
+		End Sub
+	#tag EndEvent
+
+	#tag Event
 		Sub Open()
 		  me.Title = defaultTitle + " version " + str(LimnieVersion)
 		  
@@ -3046,6 +3053,78 @@ End
 		  
 		  
 		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function SingleExport() As Boolean
+		  dim uuid as string = SingleExportSourceUUIDfield.Text.Trim.Uppercase
+		  
+		  if uuid = "" then
+		    MsgBox "UUID not defined!"
+		    return False
+		  end if
+		  
+		  if SingleExportTargetFilenameField.Text.Trim = "" then
+		    MsgBox "Target location not defined!"
+		    return False
+		  end if
+		  
+		  dim targetLocation as FolderItem = GetFolderItem(SingleExportTargetFilenameField.Text.Trim)
+		  dim targetFolder as FolderItem
+		  dim targetFile as FolderItem
+		  
+		  if IsNull(targetLocation) then
+		    MsgBox "Target path is invalid!"
+		    return false
+		  end if
+		  
+		  if targetLocation.Directory then
+		    targetFolder = targetLocation
+		    targetFile = targetFolder.Child(uuid)
+		  else  // it's a file
+		    targetFile = targetLocation
+		    targetFolder = targetFile.Parent
+		  end if
+		  
+		  if targetFile.Exists then
+		    MsgBox "The target file already exists!"
+		    return false
+		  end if
+		  
+		  dim docRetrieved as Limnie.Document = activeSession.findPoolOfDocUUID(uuid)
+		  
+		  if docRetrieved.error = true then 
+		    MsgBox docRetrieved.errorMessage
+		    return false
+		  end if
+		  
+		  dim writeStream as BinaryStream
+		  
+		  writeStream = BinaryStream.Create(targetFile)
+		  docRetrieved = activeSession.readDocument(writeStream , docRetrieved.pool , uuid)
+		  
+		  writeStream.Close
+		  
+		  if docRetrieved.error then 
+		    targetFile.Delete
+		    MsgBox docRetrieved.errorMessage
+		    return false
+		  end if
+		  
+		  if SingleExportMetadatumIsFilenameCheck.Value = true then
+		    targetFile.Name = docRetrieved.metadatum
+		  end if
+		  
+		  MsgBox "OK"
+		  
+		  
+		  
+		  
+		  
+		  
+		  
+		  
+		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
@@ -3486,6 +3565,7 @@ End
 #tag Events SingleExportDoItBtn
 	#tag Event
 		Sub Action()
+		  call SingleExport
 		  
 		End Sub
 	#tag EndEvent

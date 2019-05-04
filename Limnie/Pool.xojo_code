@@ -1,7 +1,7 @@
 #tag Class
 Protected Class Pool
 	#tag Method, Flags = &h0
-		Sub Constructor(optional initialErrorMessage as string)
+		Sub Constructor(optional initialErrorMessage as string = "")
 		  if initialErrorMessage.Trim = empty then
 		    error = False
 		    errorMessage = empty
@@ -161,6 +161,16 @@ Protected Class Pool
 			Group="Behavior"
 			Type="String"
 			EditorType="MultiLineEditor"
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="mediaCount"
+			Group="Behavior"
+			Type="Integer"
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="salt"
+			Group="Behavior"
+			Type="string"
 		#tag EndViewProperty
 	#tag EndViewBehavior
 End Class
