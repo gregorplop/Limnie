@@ -4,6 +4,8 @@ Limnie is a project that still has a long way to go before reaching some accepta
 If you find it useful and want to see it grow, here's what you can do!
 
 ## Ways you can contribute (from most important to least)
+* Study the code! Examine LimnieGUI as a reference on what Limnie does and how to integrate it to your own work
+
 * Stress-test Limnie\
 Integrate Limnie to your business application or use/make a stress-testing application to examine how reliable Limnie is.
 
