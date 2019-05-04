@@ -1,4 +1,4 @@
-# Limnie (coming soon!)
+# Limnie
 
 Limnie: /li.ˈmni/ : "lake" in Greek, plural: Limnes
 		
