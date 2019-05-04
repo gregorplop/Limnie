@@ -5,7 +5,7 @@ If you find it useful and want to see it grow, here's what you can do!
 
 ## Ways you can contribute (from most important to least)
 * Stress-test Limnie\
-Integrate Limnie to your business application or use/make a stress-testing application to examine how reliable how reliable Limnie is.
+Integrate Limnie to your business application or use/make a stress-testing application to examine how reliable Limnie is.
 
 * Create a separate Limnie test/administration application\
 Start your own repository with a copy of the Limnie library and create an application that is going to give value to the project.
