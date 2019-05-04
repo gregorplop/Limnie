@@ -11,7 +11,8 @@ The main features of Limnie are briefly explained below:
 **Local:**\
 A Limnie VFS should always be on the same machine as the applications mounting it.
 It SHOULD NOT be acessed over a network share or filesystem. It might appear to work at first, but if used in violation of this core spec, **you are risking corruption!**\
-Multiple applications running on the same machine, accessing the same Limnie, is considered a safe practice.
+Multiple applications running on the same machine, accessing the same Limnie, is considered a safe practice.\
+Within the same application, one Limnie session per thread is allowed. This is a major design restriction.
 
 **Highly configurable:**\
 A Limnie VFS consists of one or multiple storage pools that act as entirely seperate "buckets" you can assign data that belong to different domains, clients, or archival projects.
