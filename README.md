@@ -32,7 +32,7 @@ Externally, it might appear as one or more files, but when mounted properly thro
 
 ## If you're new to Limnie... 
 Please refer to the Quick Start Guide found in the LimnieGUI application and read the "CONTRIBUTING.md" file on the repository.\
-Remember: The LimnieGUI application is your definite guide on how to integrate Limnie to your own application. After all, that's what Limnie exists for!\
+Remember: The LimnieGUI application is your definite guide on how to integrate Limnie to your own application. After all, that's what Limnie exists for!
 
 ## Issues and to-do list
 
@@ -40,7 +40,7 @@ Remember: The LimnieGUI application is your definite guide on how to integrate L
 Limnie has just been released as Alpha!
 At this point, it has never been battle-tested in the field and might be a bit rough around the edges.\
 Nevertheless, its basic functionality is there:\
-Create VFS -> Create Pool -> Import object -> Export object\
+Create VFS -> Create Pool -> Import object -> Export object
 
 **To-do:**
 * Resolve an issue with pushing objects into encrypted pools.
