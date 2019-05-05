@@ -215,7 +215,7 @@ Protected Class Session
 		          #if TargetConsole or TargetWeb then
 		            dim startMoment as Integer = date(new date).TotalSeconds
 		            while date(new date).TotalSeconds - startMoment < 2
-		              app.DoEvents  // it might me a server app with everything running on the main thread; be polite and don't block other people's events
+		              app.DoEvents  // it might be a server app with everything running on the main thread; be polite and don't block other people's events
 		            wend
 		          #Elseif TargetDesktop
 		            if yielding then app.YieldToNextThread  // =============try to make things more smooth in desktop apps, not sure if it's going to work :p =====================
@@ -1090,6 +1090,9 @@ Protected Class Session
 		    if isnull(fragmentStream) then Return new Limnie.Document("Error opening fragment " + str(docInfo.fragments(i).objidx) + " on medium " + poolname + "." + str(docInfo.fragments(i).mediumidx))
 		    
 		    while not fragmentStream.EOF
+		      // the read operation reads exactly one standard-sized fragment, so it theoretically wouldn't need to be in a while/wend loop
+		      // however, this method allows the method to read from media whose max fragment size is different from what's mentioned in constant fragmentSize.
+		      // this would be the result of major misconfiguration and/or tampering with media files, and yet, we can survive it.
 		      
 		      content = fragmentStream.Read(fragmentSize * MByte)
 		      
@@ -1115,9 +1118,8 @@ Protected Class Session
 		    
 		  next i
 		  
-		  
 		  if EncodeHex(md5calculator.Value) <> docInfo.hash then Return new Limnie.Document("Error verifying retrieved document " + uuid)
-		   
+		  
 		  Return docInfo
 		  
 		  
