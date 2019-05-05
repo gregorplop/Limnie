@@ -40,7 +40,8 @@ Remember: The LimnieGUI application is your definite guide on how to integrate L
 Limnie has just been released as Alpha!
 At this point, it has never been battle-tested in the field and might be a bit rough around the edges.\
 Nevertheless, its basic functionality is there:\
-Create VFS -> Create Pool -> Import object -> Export object
+Create VFS -> Create Pool -> Import object -> Export object\
+Also, be aware that all development and testing is done on Windows. If you're evaluating Limnie (and especially LimnieGUI) on a different platform, some behavior/look might be unexpected!
 
 **To-do:**
 * Resolve an issue with pushing objects into encrypted pools.
