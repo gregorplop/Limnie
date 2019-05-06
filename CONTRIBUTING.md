@@ -23,5 +23,5 @@ email, or any other method with the owner of this repository before making a cha
 Be aware that your code will have to be thoroughly examined and will have to meet certain quality criteria.
 
 * Financial support\
-If you decide to incorporate Limnie to a commercial application (ie one you'll be making money out of), please consider making a donation. It's not necessary but it will incredibly encouraging!
+If you decide to incorporate Limnie to a commercial application (ie one you'll be making money out of), please consider making a donation. It's not necessary but it will be incredibly encouraging!
 
