@@ -54,7 +54,7 @@ Begin Window MainWindow
       Top             =   20
       Transparent     =   False
       Underline       =   False
-      Value           =   5
+      Value           =   1
       Visible         =   True
       Width           =   1014
       Begin Listbox ObjectImportList
@@ -921,7 +921,7 @@ Begin Window MainWindow
          AutoHideScrollbars=   True
          Bold            =   False
          Border          =   False
-         ColumnCount     =   1
+         ColumnCount     =   3
          ColumnsResizable=   False
          ColumnWidths    =   ""
          DataField       =   ""
@@ -932,7 +932,7 @@ Begin Window MainWindow
          EnableDragReorder=   False
          GridLinesHorizontal=   0
          GridLinesVertical=   0
-         HasHeading      =   False
+         HasHeading      =   True
          HeadingIndex    =   -1
          Height          =   451
          HelpTag         =   ""
@@ -1801,7 +1801,7 @@ Begin Window MainWindow
          AutoHideScrollbars=   True
          Bold            =   False
          Border          =   False
-         ColumnCount     =   1
+         ColumnCount     =   7
          ColumnsResizable=   False
          ColumnWidths    =   ""
          DataField       =   ""
@@ -1812,7 +1812,7 @@ Begin Window MainWindow
          EnableDragReorder=   False
          GridLinesHorizontal=   0
          GridLinesVertical=   0
-         HasHeading      =   False
+         HasHeading      =   True
          HeadingIndex    =   -1
          Height          =   457
          HelpTag         =   ""
@@ -2228,38 +2228,6 @@ Begin Window MainWindow
             Visible         =   True
             Width           =   372
          End
-      End
-      Begin PushButton ClearPasswordCacheBtn
-         AutoDeactivate  =   True
-         Bold            =   False
-         ButtonStyle     =   "0"
-         Cancel          =   False
-         Caption         =   "Clear password cache"
-         Default         =   False
-         Enabled         =   True
-         Height          =   25
-         HelpTag         =   ""
-         Index           =   -2147483648
-         InitialParent   =   "MainPanel"
-         Italic          =   False
-         Left            =   864
-         LockBottom      =   False
-         LockedInPosition=   False
-         LockLeft        =   False
-         LockRight       =   True
-         LockTop         =   True
-         Scope           =   0
-         TabIndex        =   24
-         TabPanelIndex   =   1
-         TabStop         =   True
-         TextFont        =   "System"
-         TextSize        =   14.0
-         TextUnit        =   0
-         Top             =   115
-         Transparent     =   False
-         Underline       =   False
-         Visible         =   True
-         Width           =   150
       End
       Begin GroupBox ExportSingleObjectGroup
          AutoDeactivate  =   True
@@ -2684,41 +2652,6 @@ Begin Window MainWindow
          Visible         =   True
          Width           =   740
       End
-      Begin Label WARNING
-         AutoDeactivate  =   True
-         Bold            =   False
-         DataField       =   ""
-         DataSource      =   ""
-         Enabled         =   True
-         Height          =   90
-         HelpTag         =   ""
-         Index           =   -2147483648
-         InitialParent   =   "MainPanel"
-         Italic          =   False
-         Left            =   486
-         LockBottom      =   True
-         LockedInPosition=   False
-         LockLeft        =   True
-         LockRight       =   True
-         LockTop         =   False
-         Multiline       =   True
-         Scope           =   0
-         Selectable      =   False
-         TabIndex        =   25
-         TabPanelIndex   =   2
-         TabStop         =   True
-         Text            =   "WARNING: AVOID PASSWORD PROTECTED POOLS AT THIS POINT - THIS FEATURE IS NOT FULLY SUPPORTED YET"
-         TextAlign       =   1
-         TextColor       =   &cFF000000
-         TextFont        =   "System"
-         TextSize        =   20.0
-         TextUnit        =   0
-         Top             =   425
-         Transparent     =   False
-         Underline       =   False
-         Visible         =   True
-         Width           =   528
-      End
       Begin Label QuickStartNoticeLabel
          AutoDeactivate  =   True
          Bold            =   False
@@ -2885,8 +2818,6 @@ End
 
 	#tag Method, Flags = &h0
 		Sub CloseLimnie()
-		  RemoveHandler activeSession.poolPasswordRequest , WeakAddressOf poolPasswordRequest_handler
-		  
 		  activeSession.Close
 		  
 		  setState(UIstates.noVFSopen)
@@ -2940,6 +2871,8 @@ End
 		  newPool.autoExpand = AutoExpandCheck_pool.Value
 		  
 		  newPool = activeSession.createNewPool(newPool)
+		  
+		  encryptedPools = activeSession.getPoolNames_Encrypted
 		  
 		  if newPool.error then
 		    MsgBox "Error creating pool: " + newPool.errorMessage
@@ -3012,7 +2945,7 @@ End
 		      uuidField.Text = openVFS.uuid
 		      versionField.Text = openVFS.version
 		      
-		      AddHandler activeSession.poolPasswordRequest , WeakAddressOf poolPasswordRequest_handler
+		      encryptedPools = activeSession.getPoolNames_Encrypted
 		      
 		      Return true
 		      
@@ -3029,7 +2962,7 @@ End
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function poolPasswordRequest_handler(sender as Limnie.Session, poolname as string) As string
+		Function poolPasswordRequest_handler(poolname as string) As string
 		  dim value as Variant = InputWindow.showInput("Password for pool " + poolname , "Enter password to unlock pool " + poolname)
 		  
 		  return value.StringValue
@@ -3087,7 +3020,7 @@ End
 		    end if
 		    
 		    WHERE = MediaSurvey_WHERE + " AND " + FilterOpenClosedMediaMenu.RowTag(FilterOpenClosedMediaMenu.ListIndex).StringValue
-		    System.DebugLog(WHERE)
+		    
 		    media4pool = activeSession.getMediaDetails(WHERE , " pool , idx ASC")
 		    
 		    if media4pool.Ubound = 0 then
@@ -3234,6 +3167,13 @@ End
 		    return False
 		  end if
 		  
+		  dim password as Variant = nil
+		  if activeSession.getPoolNames_Encrypted.IndexOf(docRetrieved.pool) >= 0 then
+		    password = poolPasswordRequest_handler(docRetrieved.pool)
+		    if password = "" then Return true
+		  end if
+		  
+		  
 		  dim writeStream as BinaryStream
 		  
 		  try
@@ -3244,7 +3184,7 @@ End
 		    return false
 		  end try
 		  
-		  docRetrieved = activeSession.readDocument(writeStream , docRetrieved.pool , uuid)
+		  docRetrieved = activeSession.readDocument(writeStream , docRetrieved.pool , uuid , false , password)
 		  
 		  if IsNull(writeStream) = False then writeStream.Close
 		  
@@ -3307,8 +3247,14 @@ End
 		    return false
 		  end if
 		  
+		  dim password as Variant = nil
+		  if activeSession.getPoolNames_Encrypted.IndexOf(SingleImport2PoolMenu.Text) >= 0 then
+		    password = poolPasswordRequest_handler(SingleImport2PoolMenu.Text)
+		    if password = "" then Return true
+		  end if
+		  
 		  dim sourceStream as BinaryStream = BinaryStream.Open(sourceFile , False)
-		  dim newDocument as Limnie.Document = activeSession.createDocument(sourceStream , SingleImport2PoolMenu.Text , SingleImportCustomMetadataField.Text , false)
+		  dim newDocument as Limnie.Document = activeSession.createDocument(sourceStream , SingleImport2PoolMenu.Text , SingleImportCustomMetadataField.Text , false , password)
 		  
 		  sourceStream.Close
 		  
@@ -3338,6 +3284,10 @@ End
 
 	#tag Property, Flags = &h0
 		activeSession As Limnie.Session
+	#tag EndProperty
+
+	#tag Property, Flags = &h0
+		encryptedPools(-1) As String
 	#tag EndProperty
 
 	#tag Property, Flags = &h0
@@ -3663,7 +3613,14 @@ End
 		  
 		  RefreshStop
 		  
-		  dim createNext as Limnie.Medium = activeSession.createNextMedium(PoolList.cell(row,0) , false)  // we are obviously not auto-expanding the pool in this case
+		  dim poolname as String = PoolList.cell(row , 0)
+		  dim password as Variant = nil
+		  
+		  if activeSession.getPoolNames_Encrypted.IndexOf(poolname) >= 0 then
+		    password = poolPasswordRequest_handler(poolname)
+		  end if
+		  
+		  dim createNext as Limnie.Medium = activeSession.createNextMedium(poolname , false , password)  // we are obviously not auto-expanding the pool in this case
 		  
 		  if createNext.error then 
 		    MsgBox "Error creating next medium: " + createNext.errorMessage
@@ -3786,14 +3743,6 @@ End
 		    SingleImportCustomMetadataField.Enabled = true
 		    SingleImportCustomMetadataField.Text = ""
 		  end if
-		  
-		End Sub
-	#tag EndEvent
-#tag EndEvents
-#tag Events ClearPasswordCacheBtn
-	#tag Event
-		Sub Action()
-		  if IsNull(activeSession) = false then activeSession.clearPoolPasswordCache
 		  
 		End Sub
 	#tag EndEvent

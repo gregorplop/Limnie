@@ -523,7 +523,7 @@ Protected Module Limnie
 	#tag Constant, Name = LimnieProjectURL, Type = Text, Dynamic = False, Default = \"https://github.com/gregorplop/Limnie", Scope = Public
 	#tag EndConstant
 
-	#tag Constant, Name = LimnieVersion, Type = Double, Dynamic = False, Default = \"0.7", Scope = Public
+	#tag Constant, Name = LimnieVersion, Type = Double, Dynamic = False, Default = \"0.8", Scope = Public
 	#tag EndConstant
 
 	#tag Constant, Name = MByte, Type = Double, Dynamic = False, Default = \"1048576", Scope = Private

@@ -1,14 +1,6 @@
 #tag Class
 Protected Class Session
 	#tag Method, Flags = &h0
-		Sub clearPoolPasswordCache()
-		  poolPasswords = new Dictionary
-		  Redim encryptedPoolsVerified(-1)
-		  
-		End Sub
-	#tag EndMethod
-
-	#tag Method, Flags = &h0
 		Sub Close()
 		  Destructor
 		  
@@ -26,7 +18,7 @@ Protected Class Session
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Sub Constructor(inputVFS as Limnie.VFS, optional initPoolPasswords as Dictionary)
+		Sub Constructor(inputVFS as Limnie.VFS)
 		  ErrorMsg = empty
 		  
 		  if inputVFS = nil then 
@@ -132,21 +124,6 @@ Protected Class Session
 		    return
 		  end if
 		  
-		  poolPasswords = new Dictionary
-		  
-		  if IsNull(initPoolPasswords) = false then // user has supplied pool passwords
-		    dim poolnames(-1) as string = getPoolNames
-		    for i as integer = 0 to initPoolPasswords.Count - 1
-		      if poolnames.IndexOf(initPoolPasswords.Key(i).StringValue) < 0 then
-		        ErrorMsg = "No pool named <" + initPoolPasswords.Key(i).StringValue + "> found in VFS!"
-		        activeVFS.Close
-		        activeVFS = nil
-		        return
-		      end if
-		      poolPasswords.Value(initPoolPasswords.Key(i).StringValue) = poolPasswords.Value(initPoolPasswords.Key(i).StringValue).StringValue
-		    next i
-		  end if
-		  
 		  // all ok
 		  
 		  
@@ -154,7 +131,7 @@ Protected Class Session
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function createDocument(source as Readable, poolname as string, metadatum as String, optional yielding as Boolean = false) As Limnie.Document
+		Function createDocument(source as Readable, poolname as string, metadatum as String, yielding as Boolean, optional PlainPasswd as Variant = nil) As Limnie.Document
 		  if IsNull(source) then return new Limnie.Document("New document source is invalid!")
 		  dim poolDetails as Limnie.Pool = getPoolDetails(poolname)
 		  if poolDetails.error then return new Limnie.Document("New document pool could not be opened: " + poolDetails.errorMessage)
@@ -187,7 +164,7 @@ Protected Class Session
 		    fragmentData = source.Read(fragmentSize * MByte)  // get a fragment
 		    
 		    if source.ReadError then  // crap, we have to rollback
-		      dim rollbackOK as String = rollbackPushData(newDocument)
+		      dim rollbackOK as String = rollbackPushData(newDocument , PlainPasswd)
 		      Return new Limnie.Document("Read error while creating new document: Attempted Rollback: " + if(rollbackOK = empty , "OK" , rollbackOK))
 		    end if
 		    
@@ -198,18 +175,18 @@ Protected Class Session
 		    do
 		      Media = getMediaDetails("pool = '" + poolname + "' AND open = 'true'" , "idx ASC")  // get all open media for pool
 		      if Media.Ubound = 0 and Media(0).errorCode = -1 then   // getMediaDetails failed
-		        dim rollbackOK as String = rollbackPushData(newDocument)
+		        dim rollbackOK as String = rollbackPushData(newDocument , PlainPasswd)
 		        Return new Limnie.Document("Media survey error while creating new document: " + Media(0).errorMessage + " : Attempted Rollback: " + if(rollbackOK = empty , "OK" , rollbackOK))
 		      end if
 		      
 		      PickedMedium = pickSuitableMedium(Media , fragmentData.LenB) // try to pick a medium 
 		      
 		      if PickedMedium = -1 then 
-		        dim createNextMediumOK as Limnie.Medium = createNextMedium(poolname , true)  // this is pool auto-expansion
+		        dim createNextMediumOK as Limnie.Medium = createNextMedium(poolname , true , PlainPasswd)  // this is pool auto-expansion
 		        
 		        select case createNextMediumOK.errorCode
 		        case 1  // infrastructure error
-		          dim rollbackOK as String = rollbackPushData(newDocument)
+		          dim rollbackOK as String = rollbackPushData(newDocument , PlainPasswd)
 		          Return new Limnie.Document("Could not auto-expand pool: " + createNextMediumOK.errorMessage + " : Attempted Rollback: " + if(rollbackOK = empty , "OK" , rollbackOK))
 		        case 2  // maintenance lock on this pool, something's cooking, wait a bit...
 		          #if TargetConsole or TargetWeb then
@@ -225,15 +202,15 @@ Protected Class Session
 		        end select
 		        
 		        if mediumPickTimeout = 0 then  // we've waited more than enough for a new medium to be created, something has gone wrong, abort
-		          dim rollbackOK as String = rollbackPushData(newDocument)
+		          dim rollbackOK as String = rollbackPushData(newDocument , PlainPasswd)
 		          Return new Limnie.Document("Timeout while waiting for pool to auto-expand: Rollback: " + if(rollbackOK = empty , "OK" , rollbackOK))
 		        end if
 		      end if
 		    loop until PickedMedium > 0
 		    
-		    setActiveMediumOK = setActiveMedium(poolname , PickedMedium)
+		    setActiveMediumOK = setActiveMedium(poolname , PickedMedium , PlainPasswd)
 		    if setActiveMediumOK.error = true then
-		      dim rollbackOK as String = rollbackPushData(newDocument)
+		      dim rollbackOK as String = rollbackPushData(newDocument , PlainPasswd)
 		      Return new Limnie.Document("Error opening medium " + str(PickedMedium) + " : " + setActiveMediumOK.errorMessage + " : Attempted Rollback: " + if(rollbackOK = empty , "OK" , rollbackOK))
 		    end if
 		    
@@ -262,7 +239,7 @@ Protected Class Session
 		    
 		    activeVFS.InsertRecord(poolname , newPoolCatalogueRecord)  // create the record in the pool catalogue
 		    if activeVFS.Error = true then 
-		      dim rollbackOK as String = rollbackPushData(newDocument)
+		      dim rollbackOK as String = rollbackPushData(newDocument , PlainPasswd)
 		      Return new Limnie.Document("Database error while creating pool catalogue records: " + activeVFS.ErrorMessage + " : Attempted Rollback: " + if(rollbackOK = empty , "OK" , rollbackOK))
 		    end if
 		    
@@ -287,7 +264,7 @@ Protected Class Session
 		      firstObjidx = newlyCreatedObjidx
 		      activeVFS.SQLExecute("UPDATE " + poolname + " SET firstpart = " + str(firstObjidx) + " WHERE objidx = " + str(firstObjidx))  // update the firstpart field of the first record of a fragmented document
 		      if activeVFS.Error = true then 
-		        dim rollbackOK as String = rollbackPushData(newDocument)
+		        dim rollbackOK as String = rollbackPushData(newDocument , PlainPasswd)
 		        Return new Limnie.Document("Database error while updating pool catalogue records: " + activeVFS.ErrorMessage + " : Attempted Rollback: " + if(rollbackOK = empty , "OK" , rollbackOK))
 		      end if
 		    end if
@@ -296,7 +273,7 @@ Protected Class Session
 		    if firstObjidx > 0 and source.EOF = true then  // the last part of a fragmented document, all past records are missing the correct hash
 		      activeVFS.SQLExecute("UPDATE " + poolname + " SET hash = '" + finalHash + "' WHERE firstpart = " + str(firstObjidx))
 		      if activeVFS.Error = true then
-		        dim rollbackOK as String = rollbackPushData(newDocument)
+		        dim rollbackOK as String = rollbackPushData(newDocument , PlainPasswd)
 		        Return new Limnie.Document("Error updating fragmented document hash: " + activeVFS.ErrorMessage + " : Attempted Rollback: " + if(rollbackOK = empty , "OK" , rollbackOK))
 		      end if
 		    end if
@@ -313,7 +290,7 @@ Protected Class Session
 		    activeMedium.InsertRecord("content" , newMediumRecord)
 		    
 		    if activeMedium.Error = true then
-		      dim rollbackOK as String = rollbackPushData(newDocument)
+		      dim rollbackOK as String = rollbackPushData(newDocument , PlainPasswd)
 		      Return new Limnie.Document("Error writing fragmented content to active medium: " + activeMedium.ErrorMessage + " : Attempted Rollback: " + if(rollbackOK = empty , "OK" , rollbackOK))
 		    end if
 		    
@@ -329,7 +306,7 @@ Protected Class Session
 		  
 		  activeVFS.SQLExecute("UPDATE " + poolname + " SET locked = 'false' WHERE objidx IN (" + join(objidxs , ",") + ")")
 		  if activeVFS.Error = true then 
-		    dim rollbackOK as String = rollbackPushData(newDocument)
+		    dim rollbackOK as String = rollbackPushData(newDocument , PlainPasswd)
 		    Return new Limnie.Document("Error unlocking pool catalogue entries: " + activeVFS.ErrorMessage + " : Attempted Rollback: " + if(rollbackOK = empty , "OK" , rollbackOK))
 		  end if
 		  
@@ -382,7 +359,10 @@ Protected Class Session
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function createNextMedium(poolname as string, autoExpansion as Boolean) As Limnie.Medium
+		Function createNextMedium(poolname as string, autoExpansion as Boolean, optional plainPasswd as Variant = nil) As Limnie.Medium
+		  // autoExpansion = true means this is a Limnie internal request, not a user manually wanting to create the next Medium
+		  // plainPasswd is the plaintext password if the pool is encrypted
+		  
 		  dim pooldetails as Limnie.Pool = getPoolDetails(poolname)
 		  if pooldetails.error then return new Limnie.Medium("Error verifying pool: " + pooldetails.errorMessage)
 		  
@@ -402,39 +382,32 @@ Protected Class Session
 		  // we have a free id and we know/hope nobody else is going to reserve it
 		  
 		  dim saltedPassword as String = empty
-		  dim plainPassword as string = empty
+		  
 		  if pooldetails.encrypted = true then  // the pool is configured to be encrypted; we need to find the password
+		    
 		    dim verifyOK as pair
-		    if poolPasswords.HasKey(poolname) then // there's a password in the pool password cache, let's verify it
-		      verifyOK = testPoolPassword(poolname , poolPasswords.Value(poolname).StringValue)
-		      select case verifyOK.Left.IntegerValue
-		      case 0  // all ok --cached password is correct
-		        saltedPassword = poolPasswords.Value(poolname).StringValue
-		      case 1  // infrastructure failure
-		        poolLock.Leave
-		        return new Limnie.Medium("Error verifying cached password for creating next encrypted medium: " + verifyOK.Right.StringValue , 1)
-		      case 2 // password mismatch (or db corruption, but we can't really tell the difference)
-		        poolPasswords.Remove(poolname)  // this is incorrect, no reason to keep cached
-		      else  // isn't supposed to happen
-		        poolLock.Leave
-		        Return new Limnie.Medium("Internal error!")
-		      end select
-		    end if
-		    if saltedPassword = empty then // we need to attemt asking the outside world for the password
-		      plainPassword = RaiseEvent poolPasswordRequest(poolname)
+		    
+		    if plainPasswd.IsNull then // class user did not supply a password to the method
 		      
-		      if plainPassword = empty then 
+		      poolLock.Leave
+		      Return new Limnie.Medium("Password expected for encrypted pool but not provided!")
+		      
+		    else // class user did supply a password: we need to verify it
+		      
+		      if plainPasswd.Type <> Variant.TypeString then
 		        poolLock.Leave
-		        Return new Limnie.Medium("Encrypted pool password requested but not received!")
+		        Return new Limnie.Medium("Supplied password not textual, error verifying!")
 		      end if
-		      saltedPassword = preparePassword(plainPassword , pooldetails.salt)  // we got something, but we're not sure if it's correct
+		      
+		      saltedPassword = preparePassword(plainPasswd.StringValue , pooldetails.salt)  
 		      verifyOK = testPoolPassword(poolname , saltedPassword)
+		      
 		      select case verifyOK.Left.IntegerValue
 		      case 0  // all ok
-		        poolPasswords.Value(poolname) = saltedPassword   // cache the password
+		        // nothing to do
 		      case 1  // infrastructure failure
 		        poolLock.Leave
-		        return new Limnie.Medium("Error verifying requested password for creating next encrypted medium: " + verifyOK.Right.StringValue , 1)
+		        return new Limnie.Medium("Error verifying password for creating next encrypted medium: " + verifyOK.Right.StringValue , 1)
 		      case 2 // password mismatch (or db corruption, but we can't really tell the difference)
 		        poolLock.Leave
 		        Return new Limnie.Medium("Password not verified!" , 2)
@@ -442,6 +415,8 @@ Protected Class Session
 		        poolLock.Leave
 		        Return new Limnie.Medium("Internal error!")
 		      end select
+		      
+		      
 		    end if
 		  end if
 		  
@@ -797,6 +772,35 @@ Protected Class Session
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
+		Function getPoolNames_Encrypted() As string()
+		  dim output(-1) as String
+		  ErrorMsg = empty
+		  
+		  if activeVFS = nil then
+		    ErrorMsg = "Error getting pool names: VFS not initialized!"
+		    return output
+		  end if
+		  
+		  dim rs as RecordSet = activeVFS.SQLSelect("SELECT name FROM pools WHERE salt IS NOT NULL ORDER BY name ASC")
+		  
+		  if activeVFS.Error = true then
+		    ErrorMsg = activeVFS.ErrorMessage
+		    return output
+		  end if
+		  
+		  while not rs.EOF
+		    output.Append rs.Field("name").StringValue
+		    rs.MoveNext
+		  wend
+		  
+		  return output
+		  
+		  
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Function getVFSdetails() As Limnie.VFS
 		  if activeVFS = nil then return new Limnie.VFS("VFS not initialized")
 		  
@@ -904,6 +908,10 @@ Protected Class Session
 		  
 		  mediumDB.EncryptionKey = password // input password is as-provided: no verifications and cross-checks are made here
 		  
+		  #If DebugBuild then
+		    System.DebugLog(CurrentMethodName + ":EncryptionKey = " + mediumDB.EncryptionKey + ".")
+		  #Endif
+		  
 		  if mediumDB.CreateDatabaseFile = False then  // attempt to create the database file
 		    mediumFolder.Delete
 		    return new Limnie.Medium("Error creating medium content file: " + mediumDB.ErrorMessage)
@@ -1003,9 +1011,10 @@ Protected Class Session
 		  insert = insert + newPool.autoExpand.sqlQuote + ","
 		  
 		  dim salt as string = empty
+		  
 		  if newPool.password.Trim = empty then
 		    insert = insert + " null )"
-		  else // user has supplied a password - a salt will be created and the password will be stored for the current session
+		  else // user has supplied a password - a salt will be created
 		    salt = generateSalt
 		    insert = insert + salt.sqlQuote + ")"
 		  end if
@@ -1030,9 +1039,7 @@ Protected Class Session
 		  
 		  // store the password in the cache
 		  if newPool.password.Trim <> empty then 
-		    poolPasswords.Value(newPool.name) = preparePassword(newPool.password.Trim , salt)
 		    newPool.salt = salt   // and notice that at this point newPool.password is carrying the user-defined plaintext password
-		    // store the password for the duration of the current session
 		  end if
 		  
 		  newPool.error = false
@@ -1065,7 +1072,7 @@ Protected Class Session
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function readDocument(target as Writeable, poolname as string, uuid as string, optional yielding as Boolean = false) As Limnie.Document
+		Function readDocument(target as Writeable, poolname as string, uuid as string, yielding as Boolean, optional PlainPasswd as Variant = nil) As Limnie.Document
 		  if IsNull(target) then return new Limnie.Document("Invalid storage target when retrieving data from Limnie!")
 		  if IsNull(activeVFS) then return new Limnie.Document("VFS has been disconnected!")
 		  
@@ -1083,7 +1090,7 @@ Protected Class Session
 		  
 		  for i as integer = 0 to docInfo.fragments.Ubound // go through all the fragments
 		    
-		    setMediumOK = setActiveMedium(poolname , docInfo.fragments(i).mediumidx) // password request for encrypted medium will happen here
+		    setMediumOK = setActiveMedium(poolname , docInfo.fragments(i).mediumidx , PlainPasswd) // it is the app's responsibility to know this is an encrypted pool and supply the password
 		    if setMediumOK.error then Return new Limnie.Document("Error opening medium " + poolname + "." + str(docInfo.fragments(i).mediumidx) + " : " + getLastError)
 		    
 		    fragmentStream = activeMedium.OpenBlob("content" , "content" , docInfo.fragments(i).objidx , false)
@@ -1139,9 +1146,6 @@ Protected Class Session
 		  activeVFS.SQLExecute("DELETE FROM pools WHERE name = '" + poolname + "'")
 		  if activeVFS.Error = true then return ErrorPrefix + "Rollback pool init fail: "+ activeVFS.ErrorMessage
 		  
-		  if IsNull(poolPasswords) = false then
-		    if poolPasswords.HasKey(poolname) = true then poolPasswords.Remove(poolname)
-		  end if
 		  
 		  Return empty  // success
 		  
@@ -1149,7 +1153,7 @@ Protected Class Session
 	#tag EndMethod
 
 	#tag Method, Flags = &h21
-		Private Function rollbackPushData(targetDoc as Limnie.Document) As String
+		Private Function rollbackPushData(targetDoc as Limnie.Document, PlainPasswd as Variant) As String
 		  if IsNull(activeVFS) then return "Error rolling back document: Active VFS is invalid"
 		  
 		  dim errors(-1) as string
@@ -1160,7 +1164,8 @@ Protected Class Session
 		    activeVFS.SQLExecute("DELETE FROM " + targetDoc.pool + " WHERE objidx = " + str(targetDoc.fragments(i).objidx))  // delete records belonging to fragments created so far
 		    if activeVFS.Error = true then Errors.Append "Error deleting fragment record " + str(targetDoc.fragments(i).objidx) + " : " + activeVFS.ErrorMessage
 		    
-		    setMediumOK = setActiveMedium(targetDoc.pool , targetDoc.fragments(i).mediumidx)
+		    setMediumOK = setActiveMedium(targetDoc.pool , targetDoc.fragments(i).mediumidx , PlainPasswd)
+		    
 		    if setMediumOK.error then 
 		      errors.Append "Error loading medium " + targetDoc.pool + "." + str(targetDoc.fragments(i).mediumidx) + " : " + setMediumOK.errorMessage
 		    else
@@ -1179,69 +1184,65 @@ Protected Class Session
 	#tag EndMethod
 
 	#tag Method, Flags = &h21
-		Private Function setActiveMedium(poolname as string, idx as integer) As Limnie.Medium
+		Private Function setActiveMedium(poolname as string, idx as integer, optional PlainPasswd as Variant = nil) As Limnie.Medium
 		  dim mediumDetails as Limnie.Medium = getMediumDetails(poolname , idx)
 		  if mediumDetails.error then return mediumDetails
-		  
-		  if IsNull(activeMedium) = False then
-		    if activeMedium.DatabaseFile.NativePath = mediumDetails.file.NativePath then Return mediumDetails  // activeMedium is already the Medium we're looking to set active
-		  end if
-		  
-		  closeActiveMedium  // close whatever is open, we don't need it
 		  
 		  dim poolDetails as Limnie.Pool = getPoolDetails(poolname)
 		  if poolDetails.error then Return new Limnie.Medium("Error getting pool " + poolname + " details: " + poolDetails.errorMessage)
 		  
+		  dim saltedPassword as string = ""
+		  
 		  if poolDetails.encrypted then 
-		    if encryptedPoolsVerified.IndexOf(poolname) < 0 then // pool password has not been verified
-		      if poolPasswords.HasKey(poolname) then // password is in pool cache  --go on to verify it
-		        dim verifyOK as Pair = testPoolPassword(poolname , poolPasswords.Value(poolname).StringValue)
-		        select case verifyOK.Left.IntegerValue
-		        case 0  // verified
-		          encryptedPoolsVerified.Append poolname  // mark it as verifed
-		        case 1  // infrastructure error
-		          poolPasswords.Remove(poolname)
-		          Return new Limnie.Medium("Infrastructure error while opening medium " + poolname + "." + str(idx) + " : " + verifyOK.Right.StringValue)
-		        case 2  // not verified (or corrupted db)
-		          poolPasswords.Remove(poolname)
-		        else  // should never happen
-		          Return new Limnie.Medium("Internal error while opening medium " + poolname + "." + str(idx))
-		        end Select
-		      end if
-		      if poolPasswords.HasKey(poolname) = false then  // nothing in the password cache --or just removed because it could not be verifed
-		        dim unsalted as String = raiseevent poolPasswordRequest(poolname)  // ask the application for the password
-		        dim salted as string = preparePassword(unsalted , poolDetails.salt)
-		        dim verifyOK as Pair = testPoolPassword(poolname , salted)
-		        select case verifyOK.Left.IntegerValue
-		        case 0  // verified
-		          encryptedPoolsVerified.Append poolname  // mark it as verifed
-		          poolPasswords.Value(poolname) = salted  // add it to the cache
-		        case 1  // infrastructure error
-		          Return new Limnie.Medium("Infrastructure error while opening medium " + poolname + "." + str(idx) + " : " + verifyOK.Right.StringValue)
-		        case 2  // not verified (or corrupted db)
-		          Return new Limnie.Medium("Password not verifed while opening medium " + poolname + "." + str(idx))
-		        else  // should never happen
-		          Return new Limnie.Medium("Internal error while opening medium " + poolname + "." + str(idx))
-		        end Select
-		      end if
-		    else // pool password is reported to have been verified --it ought to exist in the password cache
-		      if poolPasswords.HasKey(poolname) = False then 
-		        encryptedPoolsVerified.Remove(encryptedPoolsVerified.IndexOf(poolname))
-		        return new Limnie.Medium("Internal incosistency: Encrypted pool password is reported as verified but does not exist in cache!" , 2)
-		      end if
+		    
+		    dim verifyOK as Pair 
+		    
+		    if PlainPasswd.IsNull then // class user has not provided a password, using the event/cache Method
+		      
+		      Return new Limnie.Medium("Password expected for encrypted pool but not provided!")
+		      
+		    else  // class user has provided a password, we need to validate
+		      
+		      if PlainPasswd.Type <> Variant.TypeString then Return new Limnie.Medium("Supplied password not textual, error verifying!")
+		      
+		      saltedPassword = preparePassword(plainPasswd.StringValue , pooldetails.salt)  
+		      verifyOK = testPoolPassword(poolname , saltedPassword)
+		      
+		      select case verifyOK.Left.IntegerValue
+		      case 0  // all ok
+		        // nothing to do
+		      case 1  // infrastructure failure
+		        return new Limnie.Medium("Error verifying password for creating next encrypted medium: " + verifyOK.Right.StringValue , 1)
+		      case 2 // password mismatch (or db corruption, but we can't really tell the difference)
+		        Return new Limnie.Medium("Password not verified!")
+		      else  // isn't supposed to happen
+		        Return new Limnie.Medium("Internal error!")
+		      end select
+		      
+		      
 		    end if
+		    
 		  end if
 		  
-		  // ------ from this point on, if pool is encrypted, its password ought to be in the password cache (and verified!)
+		  // maybe medium is already open? no need to close and reopen if so
+		  if IsNull(activeMedium) = False then
+		    if activeMedium.DatabaseFile.NativePath = mediumDetails.file.NativePath then Return mediumDetails  // activeMedium is already the Medium we're looking to set active
+		  end if
+		  
+		  closeActiveMedium
 		  
 		  activeMedium = new SQLiteDatabase
 		  activeMedium.DatabaseFile = mediumDetails.file
 		  
-		  if poolPasswords.HasKey(poolname) then 
-		    activeMedium.Password = poolPasswords.Value(poolname).StringValue
+		  if poolDetails.encrypted then
+		    activeMedium.EncryptionKey = saltedPassword
 		  else
-		    activeMedium.Password = empty
+		    activeMedium.EncryptionKey = empty
 		  end if
+		  
+		  #If DebugBuild then
+		    System.DebugLog(CurrentMethodName + ":EncryptionKey = " + activeMedium.EncryptionKey + ".")
+		  #Endif
 		  
 		  if activeMedium.Connect then
 		    activeMedium.MultiUser = true  // important!
@@ -1343,11 +1344,6 @@ Protected Class Session
 	#tag EndMethod
 
 
-	#tag Hook, Flags = &h0
-		Event poolPasswordRequest(poolname as string) As string
-	#tag EndHook
-
-
 	#tag Property, Flags = &h21
 		Private activeMedium As SQLiteDatabase
 	#tag EndProperty
@@ -1357,22 +1353,7 @@ Protected Class Session
 	#tag EndProperty
 
 	#tag Property, Flags = &h21
-		#tag Note
-			pool names mentioned here have their password verified and stored in session password cache --no need to be verifying them again and again
-			this property is being used by setActiveMedium
-		#tag EndNote
-		Private encryptedPoolsVerified(-1) As string
-	#tag EndProperty
-
-	#tag Property, Flags = &h21
 		Private ErrorMsg As string = """"""
-	#tag EndProperty
-
-	#tag Property, Flags = &h21
-		#tag Note
-			keys are encrypted pool names and values are salted passwords
-		#tag EndNote
-		Private poolPasswords As Dictionary
 	#tag EndProperty
 
 
