@@ -36,6 +36,11 @@ Remember: The LimnieGUI application is your definite guide on how to integrate L
 
 ## Issues and to-do list
 
+**(23/06/2019)**\
+Complete rewrite of the authentication mechanism in the case of I/O in an encrypted pool.\
+The initial event/cache mechanism has been abandoned. Now the application must know beforehand if the pool it wants to perform I/O on is encrypted and if so, ask for the password and provide it in the related methods.\
+The demo application has been updated accordingly.
+
 **(04/05/2019)**\
 Limnie has just been released as Alpha!
 At this point, it has never been battle-tested in the field and might be a bit rough around the edges.\
@@ -44,7 +49,6 @@ Create VFS -> Create Pool -> Import object -> Export object\
 Also, be aware that all development and testing is done on Windows. If you're evaluating Limnie (and especially LimnieGUI) on a different platform, some behavior/look might be unexpected!
 
 **To-do:**
-* Resolve an issue with pushing objects into encrypted pools.
 * Add pool open/close method (_open pool = accepting new objects_)
 * Write a better UUID generation mechanism, perhaps something supporting specific namespaces.
 * Write a CLI application.
