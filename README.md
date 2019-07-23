@@ -34,7 +34,7 @@ Externally, it might appear as one or more files, but when mounted properly thro
 Please refer to the Quick Start Guide found in the LimnieGUI application and read the "CONTRIBUTING.md" file on the repository.\
 Remember: The LimnieGUI application is your definite guide on how to integrate Limnie to your own application. After all, that's what Limnie exists for!
 
-## Issues and to-do list
+## News
 
 **(23/06/2019)**\
 Complete rewrite of the authentication mechanism in the case of I/O in an encrypted pool.\
