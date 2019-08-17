@@ -54,7 +54,7 @@ Begin Window MainWindow
       Top             =   20
       Transparent     =   False
       Underline       =   False
-      Value           =   1
+      Value           =   0
       Visible         =   True
       Width           =   1014
       Begin Listbox ObjectImportList
@@ -184,7 +184,7 @@ Begin Window MainWindow
          BackColor       =   &cFFFFFF00
          Bold            =   False
          Border          =   True
-         CueText         =   ""
+         CueText         =   "right-click to pick a file or type a new filename"
          DataField       =   ""
          DataSource      =   ""
          Enabled         =   True
