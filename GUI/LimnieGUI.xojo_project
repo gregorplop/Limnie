@@ -1,6 +1,7 @@
 Type=Desktop
-RBProjectVersion=2019.011
+RBProjectVersion=2019.02
 MinIDEVersion=20070100
+OrigIDEVersion=00000000
 Class=App;App.xojo_code;&h0000000051032FFF;&h0000000000000000;false
 Window=MainWindow;MainWindow.xojo_window;&h000000006BC5F7FF;&h0000000000000000;false
 Window=InputWindow;InputWindow.xojo_window;&h000000000D099FFF;&h0000000000000000;false
