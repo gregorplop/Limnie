@@ -535,7 +535,7 @@ Protected Module Limnie
 	#tag Constant, Name = LimnieProjectURL, Type = Text, Dynamic = False, Default = \"https://github.com/gregorplop/Limnie", Scope = Public
 	#tag EndConstant
 
-	#tag Constant, Name = LimnieVersion, Type = Double, Dynamic = False, Default = \"0.8", Scope = Public
+	#tag Constant, Name = LimnieVersion, Type = Double, Dynamic = False, Default = \"1.0", Scope = Public
 	#tag EndConstant
 
 	#tag Constant, Name = MByte, Type = Double, Dynamic = False, Default = \"1048576", Scope = Private
@@ -550,7 +550,9 @@ Protected Module Limnie
 			Name="Name"
 			Visible=true
 			Group="ID"
+			InitialValue=""
 			Type="String"
+			EditorType=""
 		#tag EndViewProperty
 		#tag ViewProperty
 			Name="Index"
@@ -558,12 +560,15 @@ Protected Module Limnie
 			Group="ID"
 			InitialValue="-2147483648"
 			Type="Integer"
+			EditorType=""
 		#tag EndViewProperty
 		#tag ViewProperty
 			Name="Super"
 			Visible=true
 			Group="ID"
+			InitialValue=""
 			Type="String"
+			EditorType=""
 		#tag EndViewProperty
 		#tag ViewProperty
 			Name="Left"
@@ -571,6 +576,7 @@ Protected Module Limnie
 			Group="Position"
 			InitialValue="0"
 			Type="Integer"
+			EditorType=""
 		#tag EndViewProperty
 		#tag ViewProperty
 			Name="Top"
@@ -578,6 +584,7 @@ Protected Module Limnie
 			Group="Position"
 			InitialValue="0"
 			Type="Integer"
+			EditorType=""
 		#tag EndViewProperty
 	#tag EndViewBehavior
 End Module
